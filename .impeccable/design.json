@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-14T11:12:54Z",
+  "title": "Design System: TI 百科",
+  "extensions": {
+    "colorMeta": {
+      "aegis-gold": { "role": "primary", "displayName": "不朽盾金 Aegis Gold", "canonical": "#facc15", "tonalRamp": ["#3d3005", "#5c4708", "#7a5e0a", "#99760d", "#b88d0f", "#d6a511", "#facc15", "#fde04a"] },
+      "crimson-signal": { "role": "secondary", "displayName": "朱砂信号 Crimson Signal", "canonical": "#dc2626", "tonalRamp": ["#3d0808", "#5c0d0d", "#7a1212", "#991818", "#b81d1d", "#d62222", "#dc2626", "#f06a6a"] },
+      "obsidian-void": { "role": "neutral", "displayName": "暗渊黑 Obsidian Void", "canonical": "#09090b", "tonalRamp": ["#000000", "#050506", "#09090b", "#18181b", "#1f1f23", "#27272a", "#3f3f46", "#52525b"] },
+      "vault-panel": { "role": "neutral", "displayName": "展柜面板 Vault Panel", "canonical": "#18181b", "tonalRamp": ["#09090b", "#0f0f11", "#131316", "#18181b", "#1c1c20", "#1f1f23", "#27272a", "#3f3f46"] },
+      "vault-subtle": { "role": "neutral", "displayName": "暗格 Vault Subtle", "canonical": "#1f1f23", "tonalRamp": ["#09090b", "#131316", "#18181b", "#1c1c20", "#1f1f23", "#27272a", "#3f3f46", "#52525b"] },
+      "ink-bright": { "role": "neutral", "displayName": "亮墨 Ink Bright", "canonical": "#f4f4f5", "tonalRamp": ["#3f3f46", "#52525b", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7", "#f4f4f5", "#fafafa"] },
+      "ink-mute": { "role": "neutral", "displayName": "灰墨 Ink Mute", "canonical": "#a1a1aa", "tonalRamp": ["#27272a", "#3f3f46", "#52525b", "#71717a", "#8a8a93", "#9c9ca5", "#a1a1aa", "#d4d4d8"] },
+      "edge-faint": { "role": "neutral", "displayName": "边线 Edge Faint", "canonical": "#27272a", "tonalRamp": ["#18181b", "#1f1f23", "#232327", "#27272a", "#2f2f33", "#3f3f46", "#52525b", "#71717a"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "TI 编号大字、页面主标题。奖杯铭牌感。" },
+      "headline": { "displayName": "Headline", "purpose": "区块标题、卡片冠军名。" },
+      "body": { "displayName": "Body", "purpose": "简介与正文，mobile 默认 14px。" },
+      "label": { "displayName": "Label", "purpose": "chip、表头、元信息。" },
+      "mono": { "displayName": "Mono", "purpose": "奖金、名次编号等数字，等宽对齐。" }
+    },
+    "shadows": [
+      { "name": "state-lift", "value": "0 4px 16px rgba(0,0,0,0.3)", "purpose": "仅瞬时浮起态（模态/固定操作栏）。卡片静态与 hover 禁用。" }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "入场/滚动揭示主缓动。指数衰减，不回弹。" },
+      { "name": "ease-state", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "hover/态切换默认缓动。" },
+      { "name": "dur-fast", "value": "150ms", "purpose": "hover/边框色变。" },
+      { "name": "dur-reveal", "value": "500ms", "purpose": "入场/揭示。" }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "shell", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主行动按钮。仅浏览历届赛事等关键 CTA。金色稀用。",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">浏览历届赛事 →</a>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;background:#facc15;color:#09090b;font-weight:600;font-size:14px;padding:10px 20px;border-radius:10px;border:1px solid #facc15;transition:opacity 150ms cubic-bezier(0.4,0,0.2,1);cursor:pointer;text-decoration:none}.ds-btn-primary:hover{opacity:0.9}.ds-btn-primary:focus-visible{outline:2px solid #facc15;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "次要行动。透明底+边线，hover 边框转金。",
+      "html": "<a class=\"ds-btn-ghost\" href=\"#\">中国战队表现</a>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:#f4f4f5;font-weight:500;font-size:14px;padding:10px 20px;border-radius:10px;border:1px solid #27272a;transition:border-color 150ms cubic-bezier(0.4,0,0.2,1);text-decoration:none}.ds-btn-ghost:hover{border-color:rgba(250,204,21,0.6)}.ds-btn-ghost:focus-visible{outline:2px solid #facc15;outline-offset:2px}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "陈列馆展柜面板。扁平，色阶分层，无阴影。",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-label\">奖金池</p><p class=\"ds-card-value\">$20,770,460</p></div>",
+      "css": ".ds-card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px;transition:border-color 150ms cubic-bezier(0.4,0,0.2,1)}.ds-card:hover{border-color:rgba(250,204,21,0.6)}.ds-card-label{margin:0;color:#a1a1aa;font-size:12px;font-weight:500}.ds-card-value{margin:4px 0 0;color:#f4f4f5;font-size:24px;font-weight:900;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "默认胶囊标记。暗格底+灰墨字。",
+      "html": "<span class=\"ds-chip\">📍 西雅图 · 美国</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;background:#1f1f23;color:#a1a1aa;font-size:12px;font-weight:500;letter-spacing:0.02em;padding:2px 10px;border-radius:9999px;border:1px solid #27272a}"
+    },
+    {
+      "name": "Chip Gold",
+      "kind": "chip",
+      "refersTo": "chip-gold",
+      "description": "金色冠军 chip。仅顶级高光。",
+      "html": "<span class=\"ds-chip-gold\">🇨🇳 冠军</span>",
+      "css": ".ds-chip-gold{display:inline-flex;align-items:center;background:rgba(250,204,21,0.1);color:#facc15;font-size:12px;font-weight:600;padding:2px 10px;border-radius:9999px;border:1px solid rgba(250,204,21,0.4)}"
+    },
+    {
+      "name": "Chip Red",
+      "kind": "chip",
+      "refersTo": "chip-red",
+      "description": "朱砂中国战队 chip。仅标记中国。",
+      "html": "<span class=\"ds-chip-red\">🇨🇳 中国</span>",
+      "css": ".ds-chip-red{display:inline-flex;align-items:center;background:rgba(220,38,38,0.1);color:#dc2626;font-size:12px;font-weight:600;padding:2px 10px;border-radius:9999px;border:1px solid rgba(220,38,38,0.4)}"
+    },
+    {
+      "name": "TI Link Card",
+      "kind": "card",
+      "refersTo": "ti-link-card",
+      "description": "签名组件。陈列馆展品标签卡。TI 编号大金字+年份，冠军名加粗，奖金 mono，中国战绩朱砂 chip。",
+      "html": "<a class=\"ds-ticard\" href=\"#\"><div class=\"ds-ticard-top\"><span class=\"ds-ticard-no\">TI6</span><span class=\"ds-ticard-year\">2016</span></div><p class=\"ds-ticard-sub\">第六届 Dota2 国际邀请赛</p><dl class=\"ds-ticard-dl\"><div class=\"ds-ticard-row\"><dt>冠军</dt><dd class=\"ds-ticard-champ\">Wings Gaming</dd></div><div class=\"ds-ticard-row\"><dt>奖金池</dt><dd class=\"ds-ticard-prize\">$20,770,460</dd></div></dl><span class=\"ds-ticard-china\">🇨🇳 冠军</span></a>",
+      "css": ".ds-ticard{display:block;background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px;text-decoration:none;transition:border-color 150ms cubic-bezier(0.4,0,0.2,1)}.ds-ticard:hover{border-color:rgba(250,204,21,0.6)}.ds-ticard-top{display:flex;align-items:baseline;justify-content:space-between}.ds-ticard-no{font-size:18px;font-weight:900;letter-spacing:-0.02em;color:#facc15}.ds-ticard-year{font-size:12px;color:#a1a1aa}.ds-ticard-sub{margin:4px 0 12px;font-size:13px;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ds-ticard-dl{margin:0;display:flex;flex-direction:column;gap:6px}.ds-ticard-row{display:flex;justify-content:space-between;gap:8px;font-size:14px}.ds-ticard-row dt{color:#a1a1aa;margin:0}.ds-ticard-row dd{margin:0}.ds-ticard-champ{font-weight:700;color:#f4f4f5}.ds-ticard-prize{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#f4f4f5}.ds-ticard-china{display:inline-flex;align-items:center;margin-top:12px;background:rgba(220,38,38,0.1);color:#dc2626;font-size:12px;font-weight:600;padding:2px 10px;border-radius:9999px;border:1px solid rgba(220,38,38,0.4)}"
+    },
+    {
+      "name": "Top Nav",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "桌面 sticky 顶栏。暗渊黑85%+backdrop-blur，链接 hover/active 转金。",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-brand\">TI 百科</span><div class=\"ds-nav-links\"><a class=\"ds-nav-link is-active\" href=\"#\">历届赛事</a><a class=\"ds-nav-link\" href=\"#\">中国战队</a><a class=\"ds-nav-link\" href=\"#\">榜单</a></div></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:16px;height:56px;padding:0 16px;background:rgba(9,9,11,0.85);backdrop-filter:blur(12px);border-bottom:1px solid #27272a}.ds-nav-brand{font-weight:700;color:#f4f4f5;font-size:16px}.ds-nav-links{margin-left:auto;display:flex;gap:20px}.ds-nav-link{font-size:14px;color:#a1a1aa;text-decoration:none;transition:color 150ms cubic-bezier(0.4,0,0.2,1)}.ds-nav-link:hover{color:#facc15}.ds-nav-link.is-active{color:#facc15}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trophy Vault（奖杯陈列馆）",
+    "overview": "这个系统是一座冷光下的奖杯陈列馆。每一届 TI 的冠军、奖金、排名、中国战绩都是被托住、被照亮、被安静陈述的展品。界面是展柜的玻璃与射灯：克制、内行、有判断力。数字本身有分量，系统的职责是把数字托住，而不是替数字呐喊。审美哲学是数据即叙事：收敛色板（暗色+一金+一红），克制装饰（几乎不用阴影，靠色阶分层），把视觉重量让给数据排版。明确拒绝 SaaS landing 套路、普通 wiki 丑、臃肿电竞门户、商业彩媒。",
+    "keyCharacteristics": [
+      "暗色为底（obsidian-void），三段色阶分层（void/panel/subtle），几乎不用阴影",
+      "一金（不朽盾金）一红（朱砂信号）双强调，金主红辅，用得稀才有力",
+      "数据排版优先：等宽数字、黑体大字编号、信息密度高于装饰",
+      "移动优先单列，桌面 max 1200 分栏，表格横向滚动不拆碎",
+      "沉浸但克制：入场/揭示动效允许，但每段服务于让某事实被看见，永不闪烁/发光泛滥"
+    ],
+    "rules": [
+      { "name": "The One Spotlight Rule", "body": "不朽盾金是唯一的射灯。任何屏幕金色面积 ≤10%。冠军值得金，亚军以下不得镀金。金色泛滥=奖杯贬值。", "section": "colors" },
+      { "name": "The Crimson Single-Meaning Rule", "body": "朱砂信号只标记中国。不用于错误态、不用于警告、不用于普通强调。看到朱砂=在讲中国战队。", "section": "colors" },
+      { "name": "The Tonal-Only Depth Rule", "body": "纵深只靠 void→panel→subtle 三段色阶传达。默认无阴影。卡片是更亮的暗格，不是浮起的物体。", "section": "elevation" },
+      { "name": "The Weight-Not-Family Rule", "body": "层级靠字重+字号跨度（≥1.25 比率），不靠第二个字族。display 900 与 body 400 的跨度就是层级。", "section": "typography" },
+      { "name": "The Numbers-Mono Rule", "body": "所有奖金、百分比、名次编号用等宽。数字对齐=数据面板的专业感。", "section": "typography" },
+      { "name": "The Flat-At-Rest Rule", "body": "静态表面一律扁平。阴影是状态语言（浮起/固定），不是装饰语言。", "section": "elevation" },
+      { "name": "The Border-Not-Shadow Rule", "body": "hover/聚焦反馈用边框色变（→不朽盾金 60% 透明），不用投影。避免 ghost-card 套路。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 把不朽盾金用在冠军、奖金、主 CTA 上，单屏 ≤10%",
+      "Do 用等宽字体排奖金与名次，让数字对齐成面板",
+      "Do 用 void/panel/subtle 三段色阶分层，纵深靠亮度差不靠阴影",
+      "Do hover 反馈用边框转金（gold/60），不用投影",
+      "Do 中国战队用 🇨🇳 emoji + 朱砂 chip 双通道标识",
+      "Do 表格移动端横向滚动，保留完整列结构",
+      "Do 所有动效在 prefers-reduced-motion: reduce 下退化为即时/淡入"
+    ],
+    "donts": [
+      "Don't 滥用金色——亚军及以下不得镀金",
+      "Don't 用朱砂信号标记非中国内容",
+      "Don't 给卡片加侧色条（border-left/right >1px 彩条）",
+      "Don't 做玻璃卡片堆——backdrop-blur 仅极克制使用",
+      "Don't 做 SaaS landing 套路：大渐变 hero、emoji 当核心图标、轮播证言",
+      "Don't 做臃肿电竞门户：荧光色、闪烁文字、动画乱跳",
+      "Don't 配 1px solid border + box-shadow blur ≥16px（ghost-card）",
+      "Don't 卡片圆角 ≥24px——封顶 12–16px",
+      "Don't 用 gradient text——单色，靠字重/字号做强调"
+    ]
+  }
+}

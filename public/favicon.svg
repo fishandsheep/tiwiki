@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#09090b"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="5.5" fill="none" stroke="#facc15" stroke-width="1"/>
+  <text x="16" y="21" font-family="system-ui,Arial,sans-serif" font-size="13" font-weight="900" text-anchor="middle" fill="#facc15">TI</text>
+</svg>

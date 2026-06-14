@@ -1,0 +1,149 @@
+@import "@fontsource/cormorant-garamond/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Design tokens (dark esports).
+   Colors stored as space-separated RGB channels so Tailwind alpha modifiers
+   (e.g. bg-bg-card/80) work via rgb(var(--x) / <alpha-value>). ===== */
+:root {
+  --bg-main: 9 9 11; /* #09090b */
+  --bg-card: 24 24 27; /* #18181b */
+  --bg-subtle: 31 31 35; /* #1f1f23 */
+  --text-main: 244 244 245; /* #f4f4f5 */
+  --text-muted: 161 161 170; /* #a1a1aa */
+  --gold: 250 204 21; /* #facc15 */
+  --red: 220 38 38; /* #dc2626 — borders/fills only (2.9:1 on panel, fails text AA) */
+  --red-bright: 248 113 113; /* #f87171 — text on dark (4.5:1+ AA pass) */
+  --border: 39 39 42; /* #27272a */
+}
+
+html {
+  background-color: rgb(var(--bg-main));
+  color: rgb(var(--text-main));
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glass card surface */
+@layer components {
+  .card {
+    @apply rounded-xl border border-edge bg-bg-card/80 backdrop-blur-sm;
+  }
+  .card-hover {
+    @apply transition-colors hover:border-gold/60;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-edge bg-bg-subtle px-2.5 py-0.5 text-xs text-ink-muted;
+  }
+  .chip-gold {
+    @apply border-gold/40 bg-gold/10 text-gold;
+  }
+  .chip-red {
+    @apply border-red/40 bg-red/10;
+    color: rgb(var(--red-bright));
+  }
+  .ti-wordmark {
+    font-family: "Cormorant Garamond", "Times New Roman", serif;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: lowercase;
+    color: rgb(var(--gold));
+    text-shadow: 0 0 18px rgb(var(--gold) / 0.16);
+  }
+  .ti-hero-glow {
+    background:
+      radial-gradient(ellipse 55% 75% at 18% 0%, rgb(var(--gold) / 0.16) 0, transparent 55%),
+      linear-gradient(135deg, rgb(var(--gold) / 0.05), transparent 36%);
+  }
+  .aegis-mark {
+    border-radius: 32% 32% 42% 42% / 18% 18% 58% 58%;
+    border: 1px solid rgb(var(--gold) / 0.18);
+    background:
+      radial-gradient(circle at 50% 38%, rgb(var(--gold) / 0.16) 0, rgb(var(--gold) / 0.08) 26%, transparent 27%),
+      linear-gradient(180deg, rgb(var(--gold) / 0.2), rgb(var(--gold) / 0.03));
+    box-shadow:
+      inset 0 0 0 10px rgb(var(--gold) / 0.06),
+      0 0 48px rgb(var(--gold) / 0.1);
+  }
+}
+
+/* Thin scrollbar for horizontal-scroll tables */
+.scroll-x {
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-x::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-x::-webkit-scrollbar-thumb {
+  background: rgb(var(--border));
+  border-radius: 3px;
+}
+
+/* ===== Motion =====
+   Easing: exponential deceleration only. No bounce / elastic. */
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Route crossfade (Nuxt pageTransition name="page") */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 180ms var(--ease-out-quart);
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+/* Reveal-on-scroll + entrance. Start state gated behind html.js so the
+   element ships fully visible when JS is off / observer never fires. */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 500ms var(--ease-out-expo),
+    transform 500ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 60ms);
+  will-change: opacity, transform;
+}
+html.js .reveal.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* SVG bar grow (data-viz reveal, transform-origin bottom). */
+html.js .bar-grow {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transform: scaleY(0);
+  transition: transform 650ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+html.js .revealed .bar-grow {
+  transform: scaleY(1);
+}
+
+/* Reduced motion: instant, never gate content. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.js .reveal,
+  html.js .bar-grow {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
