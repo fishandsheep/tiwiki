@@ -6,11 +6,22 @@
       class="reveal ti-hero relative overflow-hidden border-b border-edge"
       @pointermove="handleHeroPointerMove"
       @pointerleave="resetHeroPointer"
+      @pointerdown="createHeroRipple"
     >
       <div
+        class="ti-hero-backdrop pointer-events-none absolute inset-0"
+        :style="heroMotionStyle"
+      />
+      <div
         class="ti-hero-glow pointer-events-none absolute inset-0"
-        :style="heroAegisStyle"
+        :style="heroMotionStyle"
       >
+        <span
+          v-for="ripple in heroRipples"
+          :key="ripple.id"
+          class="hero-ripple"
+          :style="{ left: `${ripple.x}px`, top: `${ripple.y}px` }"
+        />
         <div class="hero-aegis-orbit absolute right-[-3.5rem] top-1/2 hidden h-[390px] w-[300px] -translate-y-1/2 sm:block lg:right-6 lg:h-[500px] lg:w-[390px]">
           <div class="hero-aegis-aura absolute inset-[-18%]" />
           <div class="aegis-mark hero-aegis h-full w-full" />
@@ -88,21 +99,43 @@ const { data: tournaments } = await useTournaments()
 const { data: stats } = await useStats()
 
 const heroPointer = reactive({ x: 0, y: 0 })
+const heroRipples = ref<Array<{ id: number, x: number, y: number }>>([])
+let heroRippleId = 0
 
-const heroAegisStyle = computed(() => ({
-  '--aegis-x': `${heroPointer.x}px`,
-  '--aegis-y': `${heroPointer.y}px`,
+const heroMotionStyle = computed(() => ({
+  '--hero-x': `${heroPointer.x}px`,
+  '--hero-y': `${heroPointer.y}px`,
+  '--hero-bg-x': `${heroPointer.x * -0.34}px`,
+  '--hero-bg-y': `${heroPointer.y * -0.28}px`,
+  '--hero-glow-x': `${heroPointer.x * 0.18}px`,
+  '--hero-glow-y': `${heroPointer.y * 0.18}px`,
+  '--hero-hot-x': `${heroPointer.x * 0.16}px`,
+  '--hero-hot-y': `${heroPointer.y * 0.16}px`,
+  '--hero-rotate': `${heroPointer.x * 0.08}deg`,
 }))
 
 function handleHeroPointerMove(event: PointerEvent) {
   const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  heroPointer.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 28
-  heroPointer.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 22
+  heroPointer.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 34
+  heroPointer.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 26
 }
 
 function resetHeroPointer() {
   heroPointer.x = 0
   heroPointer.y = 0
+}
+
+function createHeroRipple(event: PointerEvent) {
+  const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const ripple = {
+    id: heroRippleId++,
+    x: event.clientX - bounds.left,
+    y: event.clientY - bounds.top,
+  }
+  heroRipples.value.push(ripple)
+  window.setTimeout(() => {
+    heroRipples.value = heroRipples.value.filter(item => item.id !== ripple.id)
+  }, 920)
 }
 
 // 最新届置顶放大(featured),其余走网格 —— 破均匀网格、建立层级
