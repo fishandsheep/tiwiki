@@ -6,16 +6,13 @@
     </header>
 
     <div class="space-y-8">
-      <!-- 奖金池趋势 -->
-      <PrizePoolTrend :prize-pools="rankings.prizePools" />
-
       <!-- 奖金池榜 -->
       <section v-reveal class="reveal">
         <SectionTitle title="奖金池榜" />
         <PrizePoolRanking :prize-pools="rankings.prizePools" />
       </section>
 
-      <section v-reveal class="reveal">
+      <section class="scroll-mt-4">
         <SectionTitle title="选手冠军榜" />
         <PlayerChampionRanking :players="rankings.playerChampions" />
       </section>
