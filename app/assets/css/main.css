@@ -8,15 +8,17 @@
    Colors stored as space-separated RGB channels so Tailwind alpha modifiers
    (e.g. bg-bg-card/80) work via rgb(var(--x) / <alpha-value>). ===== */
 :root {
-  --bg-main: 9 9 11; /* #09090b */
-  --bg-card: 24 24 27; /* #18181b */
-  --bg-subtle: 31 31 35; /* #1f1f23 */
-  --text-main: 244 244 245; /* #f4f4f5 */
-  --text-muted: 161 161 170; /* #a1a1aa */
-  --gold: 250 204 21; /* #facc15 */
-  --red: 220 38 38; /* #dc2626 — borders/fills only (2.9:1 on panel, fails text AA) */
-  --red-bright: 248 113 113; /* #f87171 — text on dark (4.5:1+ AA pass) */
-  --border: 39 39 42; /* #27272a */
+  --bg-main: 14 8 9; /* #0e0809 — warm Dota obsidian */
+  --bg-card: 33 22 18; /* #211612 */
+  --bg-subtle: 45 29 22; /* #2d1d16 */
+  --text-main: 255 247 232; /* #fff7e8 */
+  --text-muted: 210 183 152; /* #d2b798 */
+  --gold: 255 196 74; /* #ffc44a */
+  --red: 179 46 30; /* #b32e1e */
+  --red-bright: 255 118 76; /* #ff764c */
+  --ember: 255 91 39; /* #ff5b27 */
+  --teal: 67 214 189; /* #43d6bd */
+  --border: 91 61 42; /* #5b3d2a */
 }
 
 html {
@@ -29,15 +31,20 @@ body {
   margin: 0;
   font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(circle at 12% 8%, rgb(var(--red) / 0.18), transparent 30rem),
+    radial-gradient(circle at 88% 0%, rgb(var(--gold) / 0.11), transparent 34rem),
+    linear-gradient(180deg, rgb(27 13 9), rgb(var(--bg-main)) 24rem);
 }
 
 /* Glass card surface */
 @layer components {
   .card {
-    @apply rounded-xl border border-edge bg-bg-card/80 backdrop-blur-sm;
+    @apply rounded-xl border border-edge bg-bg-card/80 shadow-[0_18px_50px_rgb(0_0_0/0.24)] backdrop-blur-sm;
+    background-image: linear-gradient(145deg, rgb(255 255 255 / 0.055), transparent 46%);
   }
   .card-hover {
-    @apply transition-colors hover:border-gold/60;
+    @apply transition-colors hover:border-gold/70;
   }
   .chip {
     @apply inline-flex items-center gap-1 rounded-full border border-edge bg-bg-subtle px-2.5 py-0.5 text-xs text-ink-muted;
@@ -57,20 +64,71 @@ body {
     color: rgb(var(--gold));
     text-shadow: 0 0 18px rgb(var(--gold) / 0.16);
   }
-  .ti-hero-glow {
+  .ti-hero {
     background:
-      radial-gradient(ellipse 55% 75% at 18% 0%, rgb(var(--gold) / 0.16) 0, transparent 55%),
-      linear-gradient(135deg, rgb(var(--gold) / 0.05), transparent 36%);
+      linear-gradient(90deg, rgb(var(--bg-main) / 0.96) 0%, rgb(var(--bg-main) / 0.82) 48%, rgb(72 24 17 / 0.72) 100%),
+      radial-gradient(circle at 74% 42%, rgb(var(--ember) / 0.22), transparent 26rem);
+  }
+  .ti-hero-glow {
+    overflow: hidden;
+    --aegis-x: 0px;
+    --aegis-y: 0px;
+    background:
+      radial-gradient(ellipse 42% 72% at 18% 4%, rgb(var(--gold) / 0.27) 0, transparent 58%),
+      radial-gradient(ellipse 42% 58% at 78% 45%, rgb(var(--red-bright) / 0.28) 0, transparent 62%),
+      radial-gradient(circle at 52% 108%, rgb(var(--teal) / 0.14), transparent 36%),
+      linear-gradient(135deg, rgb(var(--gold) / 0.12), transparent 34%);
+  }
+  .ti-hero-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.24;
+    background-image:
+      linear-gradient(115deg, transparent 0 44%, rgb(var(--gold) / 0.18) 45%, transparent 46% 100%),
+      repeating-linear-gradient(0deg, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 8px);
+    mix-blend-mode: screen;
+  }
+  .hero-aegis-orbit {
+    transform: translate3d(var(--aegis-x), calc(-50% + var(--aegis-y)), 0) rotate(10deg);
+    animation: aegis-drift 6.5s var(--ease-out-quart) infinite alternate;
+    transition: transform 180ms var(--ease-out-quart);
+    will-change: transform;
+  }
+  .hero-aegis-aura {
+    border-radius: 999px;
+    background:
+      radial-gradient(circle, rgb(var(--gold) / 0.24), transparent 58%),
+      conic-gradient(from 210deg, transparent, rgb(var(--red-bright) / 0.24), rgb(var(--gold) / 0.2), transparent);
+    filter: blur(18px);
+    animation: aegis-pulse 4.6s ease-in-out infinite;
   }
   .aegis-mark {
+    position: relative;
+    clip-path: polygon(50% 0%, 85% 9%, 96% 39%, 82% 76%, 50% 100%, 18% 76%, 4% 39%, 15% 9%);
     border-radius: 32% 32% 42% 42% / 18% 18% 58% 58%;
-    border: 1px solid rgb(var(--gold) / 0.18);
     background:
-      radial-gradient(circle at 50% 38%, rgb(var(--gold) / 0.16) 0, rgb(var(--gold) / 0.08) 26%, transparent 27%),
-      linear-gradient(180deg, rgb(var(--gold) / 0.2), rgb(var(--gold) / 0.03));
+      radial-gradient(circle at 50% 32%, rgb(255 246 183 / 0.62) 0 7%, transparent 8%),
+      radial-gradient(circle at 50% 38%, rgb(var(--gold) / 0.28) 0, rgb(var(--red-bright) / 0.13) 24%, transparent 25%),
+      linear-gradient(90deg, transparent 0 45%, rgb(255 238 162 / 0.34) 47% 53%, transparent 55% 100%),
+      linear-gradient(180deg, rgb(var(--gold) / 0.46), rgb(var(--red) / 0.18) 56%, rgb(var(--bg-main) / 0.04));
     box-shadow:
-      inset 0 0 0 10px rgb(var(--gold) / 0.06),
-      0 0 48px rgb(var(--gold) / 0.1);
+      inset 0 0 0 12px rgb(var(--gold) / 0.1),
+      inset 0 -34px 60px rgb(var(--red) / 0.2),
+      0 0 64px rgb(var(--gold) / 0.2);
+  }
+  .aegis-mark::before,
+  .aegis-mark::after {
+    content: "";
+    position: absolute;
+    inset: 10% 18% 18%;
+    border: 1px solid rgb(var(--gold) / 0.28);
+    clip-path: polygon(50% 0%, 83% 12%, 91% 42%, 74% 76%, 50% 94%, 26% 76%, 9% 42%, 17% 12%);
+  }
+  .aegis-mark::after {
+    inset: 24% 35% 18%;
+    background: linear-gradient(180deg, rgb(var(--gold) / 0.34), transparent);
+    filter: blur(0.2px);
   }
 }
 
@@ -129,6 +187,16 @@ html.js .bar-grow {
 }
 html.js .revealed .bar-grow {
   transform: scaleY(1);
+}
+
+@keyframes aegis-drift {
+  0% { margin-top: -8px; }
+  100% { margin-top: 10px; }
+}
+
+@keyframes aegis-pulse {
+  0%, 100% { opacity: 0.58; transform: scale(0.98); }
+  50% { opacity: 0.95; transform: scale(1.04); }
 }
 
 /* Reduced motion: instant, never gate content. */
