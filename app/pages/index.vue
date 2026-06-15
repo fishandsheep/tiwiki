@@ -1,10 +1,20 @@
 <template>
   <div>
     <!-- Hero -->
-    <section v-reveal class="reveal relative overflow-hidden border-b border-edge">
-      <div class="ti-hero-glow pointer-events-none absolute inset-0" />
-      <div class="pointer-events-none absolute -right-16 top-1/2 hidden h-[360px] w-[280px] -translate-y-1/2 rotate-[12deg] opacity-30 blur-[0.5px] sm:block lg:h-[440px] lg:w-[340px]">
-        <div class="aegis-mark h-full w-full" />
+    <section
+      v-reveal
+      class="reveal ti-hero relative overflow-hidden border-b border-edge"
+      @pointermove="handleHeroPointerMove"
+      @pointerleave="resetHeroPointer"
+    >
+      <div
+        class="ti-hero-glow pointer-events-none absolute inset-0"
+        :style="heroAegisStyle"
+      >
+        <div class="hero-aegis-orbit absolute right-[-3.5rem] top-1/2 hidden h-[390px] w-[300px] -translate-y-1/2 sm:block lg:right-6 lg:h-[500px] lg:w-[390px]">
+          <div class="hero-aegis-aura absolute inset-[-18%]" />
+          <div class="aegis-mark hero-aegis h-full w-full" />
+        </div>
       </div>
       <div class="relative mx-auto max-w-shell px-4 py-12 sm:py-16">
         <span class="chip chip-gold">Dota2 · The International</span>
@@ -22,10 +32,10 @@
           </div>
         </div>
         <div class="mt-6 flex flex-wrap gap-3">
-          <NuxtLink to="/ti" class="rounded-lg bg-gold px-4 py-2 text-sm font-bold text-bg-main transition-opacity hover:opacity-90">
+          <NuxtLink to="/ti" class="rounded-lg bg-gold px-4 py-2 text-sm font-bold text-bg-main shadow-[0_0_26px_rgb(var(--gold)/0.24)] transition-opacity hover:opacity-90">
             浏览历届赛事 →
           </NuxtLink>
-          <NuxtLink to="/china" class="rounded-lg border border-edge px-4 py-2 text-sm font-medium text-ink-main transition-colors hover:border-gold/60">
+          <NuxtLink to="/china" class="rounded-lg border border-edge bg-bg-card/45 px-4 py-2 text-sm font-medium text-ink-main transition-colors hover:border-gold/60">
             中国战队表现
           </NuxtLink>
         </div>
@@ -76,6 +86,24 @@ import { formatUsd } from '~/composables/tiData'
 
 const { data: tournaments } = await useTournaments()
 const { data: stats } = await useStats()
+
+const heroPointer = reactive({ x: 0, y: 0 })
+
+const heroAegisStyle = computed(() => ({
+  '--aegis-x': `${heroPointer.x}px`,
+  '--aegis-y': `${heroPointer.y}px`,
+}))
+
+function handleHeroPointerMove(event: PointerEvent) {
+  const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  heroPointer.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 28
+  heroPointer.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 22
+}
+
+function resetHeroPointer() {
+  heroPointer.x = 0
+  heroPointer.y = 0
+}
 
 // 最新届置顶放大(featured),其余走网格 —— 破均匀网格、建立层级
 const featured = computed(() => tournaments.value[0] ?? null)
