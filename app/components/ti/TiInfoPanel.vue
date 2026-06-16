@@ -13,9 +13,9 @@
       </div>
 
       <dl class="divide-y divide-edge">
-        <div v-for="r in rows" :key="r.label" class="flex justify-between gap-3 px-4 py-2.5">
+        <div v-for="r in rows" :key="r.label" class="grid grid-cols-[5rem_1fr] gap-3 px-4 py-2.5 sm:flex sm:justify-between">
           <dt class="text-sm text-ink-muted">{{ r.label }}</dt>
-          <dd class="text-right text-sm font-medium text-ink-main">{{ r.value }}</dd>
+          <dd class="min-w-0 text-right text-sm font-medium text-ink-main break-words">{{ r.value }}</dd>
         </div>
       </dl>
     </div>
