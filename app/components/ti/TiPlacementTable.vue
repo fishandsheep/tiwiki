@@ -10,7 +10,7 @@
     </div>
 
     <div v-else class="scroll-x overflow-x-auto">
-      <table class="w-full min-w-[560px] text-sm">
+      <table class="w-full min-w-[480px] sm:min-w-[560px] text-sm">
         <thead>
           <tr class="border-b border-edge text-left text-xs text-ink-muted">
             <th class="px-4 py-2 font-bold">名次</th>
