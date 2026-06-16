@@ -2,14 +2,14 @@
   <div>
     <TiHero :t="detail!" />
 
-    <div class="mx-auto max-w-shell px-4 py-6">
-      <div class="grid gap-5 lg:grid-cols-3 lg:gap-6">
+    <div class="mx-auto max-w-shell px-3 py-5 sm:px-4 sm:py-6 lg:py-8">
+      <div class="grid min-w-0 gap-5 lg:grid-cols-3 lg:gap-6">
         <!-- 主内容 -->
-        <div class="space-y-5 lg:col-span-2">
+        <div class="order-2 min-w-0 space-y-5 lg:order-none lg:col-span-2">
           <!-- 赛事简介 -->
-          <section v-reveal class="reveal card p-5">
-            <h2 class="mb-2 text-base font-bold text-ink-main">赛事简介</h2>
-            <p class="text-sm leading-relaxed text-ink-muted">{{ detail?.summaryZh }}</p>
+          <section v-reveal class="reveal card p-4 sm:p-5 lg:p-6">
+            <h2 class="mb-2 text-base font-bold text-ink-main lg:text-lg">赛事简介</h2>
+            <p class="max-w-prose text-sm leading-relaxed text-ink-muted lg:text-base lg:leading-8">{{ detail?.summaryZh }}</p>
           </section>
 
           <!-- 中国战队表现 -->
@@ -29,7 +29,7 @@
         </div>
 
         <!-- 侧栏：基础信息 -->
-        <div class="lg:col-span-1">
+        <div class="order-1 min-w-0 lg:order-none lg:col-span-1 lg:row-start-1">
           <TiInfoPanel v-reveal :t="detail!" />
         </div>
       </div>
@@ -51,8 +51,8 @@ const { data: china } = await useChinaPerformance(detail.value.id)
 useHead({
   title:
     detail.value.status === 'cancelled'
-      ? `${detail.value.year} 赛事取消 — ti 百科`
-      : `ti ${detail.value.tiNo} · ${detail.value.nameZh} — ti 百科`,
+      ? `${detail.value.year} 赛事取消 — Ti百科`
+      : `Ti${detail.value.tiNo} · ${detail.value.nameZh} — Ti百科`,
   meta: [{ name: 'description', content: detail.value.summaryZh }],
 })
 </script>

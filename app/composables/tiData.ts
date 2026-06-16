@@ -32,7 +32,7 @@ export function formatDateRange(a: string, b: string, status: Tournament['status
 }
 
 export function formatTiLabel(no: number | string) {
-  return `ti ${no}`
+  return `Ti${no}`
 }
 
 export function tournamentLabel(t: Pick<Tournament, 'status' | 'tiNo' | 'year'>) {

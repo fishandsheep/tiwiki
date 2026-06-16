@@ -29,6 +29,7 @@ export interface Team {
   region: string
   country: string
   logo: string
+  logoSourceUrl?: string
   descriptionZh: string
 }
 
@@ -41,6 +42,7 @@ export interface Placement {
   isChinaTeam: boolean
   region?: string
   inviteType?: string
+  teamLogo?: string
 }
 
 export interface Participant {
@@ -50,12 +52,15 @@ export interface Participant {
   region: string
   country: string
   inviteType: string
+  teamLogo: string
 }
 
 export interface RosterEntry {
   playerId: string
   handle: string
   role: string
+  country: string
+  avatar: string
 }
 
 export interface TeamRoster {
@@ -63,6 +68,7 @@ export interface TeamRoster {
   teamName: string
   inviteType: string
   region: string
+  teamLogo: string
   players: RosterEntry[]
 }
 
@@ -108,6 +114,7 @@ export interface PlayerChampionRow {
   handle: string
   country: string
   region: string
+  avatar: string
   championshipCount: number
   championshipTiNos: number[]
   championshipYears: number[]

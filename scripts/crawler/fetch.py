@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import unquote, urljoin, urlparse
 from typing import Any
 
 import requests
 
 sys.path.append(str(Path(__file__).resolve().parent))
-from constants import CACHE_DIR, LIQUIPEDIA_API, REQUEST_INTERVAL_SECONDS, USER_AGENT, WIKIPEDIA_API
+from constants import CACHE_DIR, LIQUIPEDIA_API, MEDIA_DIR, REQUEST_INTERVAL_SECONDS, USER_AGENT, WIKIPEDIA_API, slugify
 
 
 class WikiFetcher:
@@ -85,3 +87,55 @@ class WikiFetcher:
         if not revisions:
             return ""
         return revisions[0].get("slots", {}).get("main", {}).get("content", "")
+
+    def resolve_image_url(self, image_name: str) -> str:
+        name = image_name.strip()
+        if not name:
+            return ""
+        if name.startswith("//"):
+            return f"https:{name}"
+        if name.startswith("http://") or name.startswith("https://"):
+            return name
+        name = re.sub(r"^(File|Image):", "", name, flags=re.I).strip()
+        if not name:
+            return ""
+        payload = self._request(
+            LIQUIPEDIA_API,
+            {
+                "action": "query",
+                "titles": f"File:{name}",
+                "prop": "imageinfo",
+                "iiprop": "url",
+                "format": "json",
+                "formatversion": 2,
+            },
+            f"liquipedia-image-{slugify(name)}.json",
+        )
+        pages = payload.get("query", {}).get("pages", [])
+        if not pages:
+            return ""
+        imageinfo = pages[0].get("imageinfo", [])
+        return imageinfo[0].get("url", "") if imageinfo else ""
+
+    def download_media(self, source_url: str, kind: str, slug: str) -> tuple[str, str]:
+        if not source_url:
+            return "", ""
+        url = source_url.strip()
+        if url.startswith("//"):
+            url = f"https:{url}"
+        elif url.startswith("/"):
+            url = urljoin("https://liquipedia.net", url)
+        parsed = urlparse(url)
+        ext = Path(unquote(parsed.path)).suffix.lower()
+        if ext not in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}:
+            ext = ".png"
+        media_dir = MEDIA_DIR / kind
+        media_dir.mkdir(parents=True, exist_ok=True)
+        file_path = media_dir / f"{slugify(slug)}{ext}"
+        if not file_path.exists():
+            self._throttle()
+            resp = self.session.get(url, timeout=30)
+            resp.raise_for_status()
+            file_path.write_bytes(resp.content)
+            self.last_request_at = time.time()
+        return f"/media/liquipedia/{kind}/{file_path.name}", url

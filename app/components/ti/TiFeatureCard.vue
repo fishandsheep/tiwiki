@@ -4,7 +4,7 @@
     class="card card-hover reveal group block overflow-hidden p-0"
   >
     <div class="grid gap-0 lg:grid-cols-[260px_1fr]">
-      <!-- 左:ti 编号铭牌 -->
+      <!-- 左:Ti编号铭牌 -->
       <div class="relative flex flex-col justify-between gap-4 border-b border-edge p-6 lg:border-b-0 lg:border-r">
         <div>
           <span class="chip" :class="tournament.status === 'cancelled' ? '' : 'chip-gold'">
@@ -13,25 +13,25 @@
           <p class="mt-4 text-5xl font-black leading-none text-gold sm:text-6xl">
             {{ tournament.status === 'cancelled' ? tournament.year : formatTiLabel(tournament.tiNo) }}
           </p>
-          <p class="mt-1 text-sm text-ink-muted">{{ tournament.year }} · {{ tournament.city }}</p>
+          <p class="mt-1 text-sm text-ink-muted lg:text-base">{{ tournament.year }} · {{ tournament.city }}</p>
         </div>
-        <p class="text-xs text-ink-muted">{{ tournament.nameZh }}</p>
+        <p class="text-xs text-ink-muted lg:text-sm">{{ tournament.nameZh }}</p>
       </div>
 
       <!-- 右:冠军 + 奖金 + 简介 -->
       <div class="p-6">
         <div class="flex flex-wrap items-baseline gap-x-6 gap-y-2">
           <div>
-            <p class="text-xs uppercase tracking-wide text-ink-muted">冠军</p>
-            <p class="text-2xl font-black text-gold">{{ tournament.champion }}</p>
+            <p class="text-xs uppercase tracking-wide text-ink-muted lg:text-sm">冠军</p>
+            <p class="text-2xl font-black text-gold lg:text-3xl">{{ tournament.champion }}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-wide text-ink-muted">奖金池</p>
-            <p class="font-mono text-lg font-bold text-ink-main">{{ formatUsd(tournament.prizePoolUsd) }}</p>
+            <p class="text-xs uppercase tracking-wide text-ink-muted lg:text-sm">奖金池</p>
+            <p class="font-mono text-lg font-bold text-ink-main lg:text-xl">{{ formatUsd(tournament.prizePoolUsd) }}</p>
           </div>
         </div>
 
-        <p class="mt-4 line-clamp-2 max-w-2xl text-sm leading-relaxed text-ink-muted">
+        <p class="mt-4 line-clamp-2 max-w-2xl text-sm leading-relaxed text-ink-muted lg:text-base lg:leading-8">
           {{ tournament.summaryZh }}
         </p>
 
@@ -39,7 +39,7 @@
           <span v-if="tournament.status === 'cancelled'" class="chip">赛事取消</span>
           <span v-if="chinaTag" class="chip" :class="tournament.bestChinaRank === 1 ? 'chip-gold' : 'chip-red'">{{ chinaTag }}</span>
           <span class="chip">亚军 {{ tournament.runnerUp }}</span>
-          <span class="ml-auto text-sm font-medium text-gold transition-transform group-hover:translate-x-1">查看详情 →</span>
+          <span class="ml-auto text-sm font-medium text-gold transition-transform group-hover:translate-x-1 lg:text-base">查看详情 →</span>
         </div>
       </div>
     </div>

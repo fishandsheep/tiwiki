@@ -24,14 +24,15 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
     for team in teams:
         cur.execute(
             """
-            INSERT INTO teams (id, name, name_zh, region, country, logo, description_zh, liquipedia_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO teams (id, name, name_zh, region, country, logo, logo_source_url, description_zh, liquipedia_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               name = excluded.name,
               name_zh = CASE WHEN teams.name_zh IS NOT NULL AND teams.name_zh != '' THEN teams.name_zh ELSE excluded.name_zh END,
               region = COALESCE(NULLIF(teams.region, ''), excluded.region),
               country = COALESCE(NULLIF(teams.country, ''), excluded.country),
-              logo = excluded.logo,
+              logo = COALESCE(NULLIF(excluded.logo, ''), teams.logo),
+              logo_source_url = COALESCE(NULLIF(excluded.logo_source_url, ''), teams.logo_source_url),
               description_zh = CASE WHEN teams.description_zh IS NOT NULL AND teams.description_zh != '' THEN teams.description_zh ELSE excluded.description_zh END,
               liquipedia_url = excluded.liquipedia_url
             """,
@@ -41,7 +42,8 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
                 team["name_zh"],
                 team["region"],
                 team["country"],
-                team["logo"],
+                team.get("logo", ""),
+                team.get("logo_source_url", ""),
                 team["description_zh"],
                 team["liquipedia_url"],
             ),
@@ -50,13 +52,21 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
     for player in players:
         cur.execute(
             """
-            INSERT INTO players (id, handle, real_name, country, region, position, liquipedia_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO players (id, handle, real_name, country, region, avatar, avatar_source_url, position, liquipedia_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               handle = excluded.handle,
               real_name = COALESCE(NULLIF(players.real_name, ''), excluded.real_name),
               country = COALESCE(NULLIF(players.country, ''), excluded.country),
               region = COALESCE(NULLIF(players.region, ''), excluded.region),
+              avatar = CASE
+                WHEN excluded.avatar LIKE '/media/%' THEN excluded.avatar
+                ELSE COALESCE(NULLIF(players.avatar, ''), excluded.avatar)
+              END,
+              avatar_source_url = CASE
+                WHEN excluded.avatar LIKE '/media/%' THEN excluded.avatar_source_url
+                ELSE COALESCE(NULLIF(players.avatar_source_url, ''), excluded.avatar_source_url)
+              END,
               position = COALESCE(NULLIF(players.position, ''), excluded.position),
               liquipedia_url = excluded.liquipedia_url
             """,
@@ -66,6 +76,8 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
                 player["real_name"],
                 player["country"],
                 player["region"],
+                player.get("avatar", ""),
+                player.get("avatar_source_url", ""),
                 player["position"],
                 player["liquipedia_url"],
             ),
@@ -130,14 +142,16 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
         for participant in participants_by_tournament.get(tournament["id"], []):
             cur.execute(
                 """
-                INSERT INTO participants (tournament_id, team_id, region, country, invite_type, seed)
-                VALUES (?, ?, ?, ?, ?, '')
+                INSERT INTO participants (tournament_id, team_id, region, country, team_logo, team_logo_source_url, invite_type, seed)
+                VALUES (?, ?, ?, ?, ?, ?, ?, '')
                 """,
                 (
                     tournament["id"],
                     participant["team_id"],
                     participant["region"],
                     participant["country"],
+                    participant.get("team_logo", ""),
+                    participant.get("team_logo_source_url", ""),
                     participant["invite_type"],
                 ),
             )
@@ -170,14 +184,20 @@ def upsert_dataset(tournaments: list[dict], teams: list[dict], players: list[dic
             seen.add(key)
             cur.execute(
                 """
-                INSERT OR IGNORE INTO rosters (tournament_id, team_id, player_id, role)
-                VALUES (?, ?, ?, ?)
+                INSERT OR IGNORE INTO rosters (
+                  tournament_id, team_id, player_id, role,
+                  player_avatar, player_avatar_source_url, player_country
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     tournament["id"],
                     roster["team_id"],
                     roster["player_id"],
                     roster["role"],
+                    roster.get("player_avatar", ""),
+                    roster.get("player_avatar_source_url", ""),
+                    roster.get("player_country", ""),
                 ),
             )
 

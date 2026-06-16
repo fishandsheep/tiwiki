@@ -2,13 +2,13 @@
   <div class="mx-auto max-w-shell px-4 py-8">
     <header v-reveal class="reveal mb-6">
       <h1 class="text-2xl font-black text-ink-main sm:text-3xl">历届赛事</h1>
-      <p class="mt-1 text-sm text-ink-muted">Dota2 国际邀请赛 ti 1 到 ti {{ maxNo }}</p>
+      <p class="mt-1 text-sm text-ink-muted">Dota2 国际邀请赛 Ti1 到 Ti{{ maxNo }}</p>
     </header>
 
     <!-- 搜索 -->
     <div class="mb-6">
       <label class="relative block">
-        <span class="sr-only">搜索 ti / 战队</span>
+        <span class="sr-only">搜索 Ti/ 战队</span>
         <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted">
           <Icon name="pin" :size="16" />
         </span>
@@ -22,13 +22,13 @@
           spellcheck="false"
           maxlength="60"
           placeholder="搜索届号 / 年份 / 冠军 / 战队…"
-          class="w-full rounded-lg border border-edge bg-bg-card py-2.5 pl-9 pr-16 text-sm text-ink-main placeholder:text-ink-muted/70 transition-colors focus:border-gold/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40"
+          class="min-h-11 w-full rounded-lg border border-edge bg-bg-card py-2.5 pl-9 pr-16 text-sm text-ink-main placeholder:text-ink-muted/70 transition-colors focus:border-gold/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40"
           @keydown.esc.prevent="clear"
         />
         <button
           v-if="q"
           type="button"
-          class="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs text-ink-muted transition-colors hover:text-gold"
+          class="absolute right-2 top-1/2 inline-flex min-h-10 -translate-y-1/2 items-center rounded px-3 py-1 text-xs text-ink-muted transition-colors hover:text-gold"
           aria-label="清空搜索"
           @click="clear"
         >清空</button>
@@ -110,5 +110,5 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
-useHead({ title: '历届赛事 — ti 百科' })
+useHead({ title: '历届赛事 — Ti百科' })
 </script>

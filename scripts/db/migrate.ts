@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS teams (
   region TEXT,
   country TEXT,
   logo TEXT DEFAULT '',
+  logo_source_url TEXT DEFAULT '',
   description_zh TEXT DEFAULT '',
   liquipedia_url TEXT
 );
@@ -49,6 +50,8 @@ CREATE TABLE IF NOT EXISTS players (
   real_name TEXT,
   country TEXT,
   region TEXT,
+  avatar TEXT DEFAULT '',
+  avatar_source_url TEXT DEFAULT '',
   position TEXT,
   liquipedia_url TEXT
 );
@@ -69,6 +72,8 @@ CREATE TABLE IF NOT EXISTS participants (
   team_id TEXT NOT NULL REFERENCES teams(id),
   region TEXT,
   country TEXT,
+  team_logo TEXT DEFAULT '',
+  team_logo_source_url TEXT DEFAULT '',
   invite_type TEXT,
   seed TEXT,
   UNIQUE (tournament_id, team_id)
@@ -80,9 +85,27 @@ CREATE TABLE IF NOT EXISTS rosters (
   team_id TEXT NOT NULL REFERENCES teams(id),
   player_id TEXT NOT NULL REFERENCES players(id),
   role TEXT,
+  player_avatar TEXT DEFAULT '',
+  player_avatar_source_url TEXT DEFAULT '',
+  player_country TEXT DEFAULT '',
   UNIQUE (tournament_id, team_id, player_id)
 );
 `)
+
+function addColumnIfMissing(table: string, column: string, definition: string) {
+  const existing = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>
+  if (existing.some((row) => row.name === column)) return
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+}
+
+addColumnIfMissing('teams', 'logo_source_url', "TEXT DEFAULT ''")
+addColumnIfMissing('players', 'avatar', "TEXT DEFAULT ''")
+addColumnIfMissing('players', 'avatar_source_url', "TEXT DEFAULT ''")
+addColumnIfMissing('participants', 'team_logo', "TEXT DEFAULT ''")
+addColumnIfMissing('participants', 'team_logo_source_url', "TEXT DEFAULT ''")
+addColumnIfMissing('rosters', 'player_avatar', "TEXT DEFAULT ''")
+addColumnIfMissing('rosters', 'player_avatar_source_url', "TEXT DEFAULT ''")
+addColumnIfMissing('rosters', 'player_country', "TEXT DEFAULT ''")
 
 db.close()
 console.log(`migrated ${dbPath}`)

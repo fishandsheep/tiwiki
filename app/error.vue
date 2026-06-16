@@ -9,7 +9,7 @@
         </h1>
         <p class="mt-3 text-sm leading-relaxed text-ink-muted">
           {{ isNotFound
-            ? '你访问的 ti 页面不存在，或链接有误。可从下方已收录届次重新进入。'
+            ? '你访问的 Ti页面不存在，或链接有误。可从下方已收录届次重新进入。'
             : '服务器或页面渲染遇到异常。可返回首页重试。'
           }}
         </p>
@@ -52,5 +52,5 @@ const isNotFound = computed(() => props.error?.statusCode === 404)
 
 const { data: tournaments } = await useTournaments()
 
-useHead({ title: `${isNotFound.value ? '未收录' : '出错了'} — ti 百科` })
+useHead({ title: `${isNotFound.value ? '未收录' : '出错了'} — Ti百科` })
 </script>

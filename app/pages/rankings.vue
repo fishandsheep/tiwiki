@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-shell px-4 py-8">
     <header v-reveal class="reveal mb-6">
       <h1 class="text-2xl font-black text-ink-main sm:text-3xl">榜单</h1>
-      <p class="mt-1 text-sm text-ink-muted">奖金池与 ti 冠军选手总览</p>
+      <p class="mt-1 text-sm text-ink-muted">奖金池与 Ti冠军选手总览</p>
     </header>
 
     <div class="space-y-8">
@@ -22,5 +22,5 @@
 
 <script setup lang="ts">
 const { data: rankings } = await useRankings()
-useHead({ title: '榜单 — ti 百科' })
+useHead({ title: '榜单 — Ti百科' })
 </script>

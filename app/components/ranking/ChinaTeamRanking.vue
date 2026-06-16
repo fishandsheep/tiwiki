@@ -4,12 +4,12 @@
       v-for="(c, i) in chinaTeams"
       :key="c.tiNo"
       :to="`/ti/${c.routeId}`"
-      class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-bg-subtle"
+      class="grid grid-cols-[1.25rem_3.75rem_1fr] items-center gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-bg-subtle sm:flex sm:gap-3 sm:py-2.5"
     >
-      <span class="w-5 text-center font-mono text-xs text-ink-muted">{{ i + 1 }}</span>
-      <span class="w-16 font-black" :class="c.bestRank === 1 ? 'text-gold' : 'text-ink-main'">{{ formatTiLabel(c.tiNo) }}</span>
-      <span class="flex-1 truncate text-sm font-medium text-ink-main">{{ c.bestTeamName }}</span>
-      <span class="chip" :class="chipClass(c.bestRank)">{{ c.bestPlacement }}</span>
+      <span class="text-center font-mono text-xs text-ink-muted sm:w-5">{{ i + 1 }}</span>
+      <span class="font-black sm:w-16" :class="c.bestRank === 1 ? 'text-gold' : 'text-ink-main'">{{ formatTiLabel(c.tiNo) }}</span>
+      <span class="min-w-0 truncate text-sm font-medium text-ink-main sm:flex-1">{{ c.bestTeamName }}</span>
+      <span class="chip col-start-3 justify-self-start" :class="chipClass(c.bestRank)">{{ c.bestPlacement }}</span>
     </NuxtLink>
   </div>
 </template>

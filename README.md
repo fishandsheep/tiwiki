@@ -15,7 +15,7 @@
 
 ```
 app/
-├── components/        # layout / ti / ranking，扁平命名（<TiCard/> 非 <TiTiCard/>）
+├── components/        # layout / Ti/ ranking，扁平命名（<TiCard/> 非 <TiTiCard/>）
 ├── composables/       # 数据 join 层（useTournaments/useTournament/useRankings/useChinaPerformance/tiData）
 ├── pages/             # index, ti/index, ti/[id], china, rankings
 ├── types/ti.ts        # 数据模型 TS 接口

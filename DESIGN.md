@@ -2,14 +2,16 @@
 name: TI 百科
 description: Dota2 TI 历届赛事中文资料库 — 奖杯陈列馆
 colors:
-  aegis-gold: "#facc15"
-  crimson-signal: "#dc2626"
-  obsidian-void: "#09090b"
-  vault-panel: "#18181b"
-  vault-subtle: "#1f1f23"
-  ink-bright: "#f4f4f5"
-  ink-mute: "#a1a1aa"
-  edge-faint: "#27272a"
+  aegis-gold: "#d5974b"
+  crimson-signal: "#b23125"
+  crimson-bright: "#ec553d"
+  ember: "#de5826"
+  obsidian-void: "#080706"
+  vault-panel: "#151210"
+  vault-subtle: "#221d19"
+  ink-bright: "#f1eae0"
+  ink-mute: "#b4a89a"
+  edge-faint: "#41342b"
 typography:
   display:
     fontFamily: '"PingFang SC","Microsoft YaHei",system-ui,-apple-system,Segoe UI,sans-serif'
@@ -83,43 +85,44 @@ components:
 
 **Creative North Star: "The Trophy Vault（奖杯陈列馆）"**
 
-这个系统是一座冷光下的奖杯陈列馆。每一届 TI 的冠军、奖金、排名、中国战绩都是被托住、被照亮、被安静陈述的展品。界面是展柜的玻璃与射灯：克制、内行、有判断力。数字本身有分量，系统的职责是把数字托住，而不是替数字呐喊。
+这个系统是一座 Dota 2 官网式黑红铜金语境里的奖杯陈列馆。每一届 TI 的冠军、奖金、排名、中国战绩都是被托住、被照亮、被安静陈述的展品。界面是粗粝暗面、红锈火光与铜金边缘：克制、内行、有判断力。数字本身有分量，系统的职责是把数字托住，而不是替数字呐喊。
 
 审美哲学是**数据即叙事**。奖金池的位数、冠军的名字、中国战队的名次——这些就是故事。所以系统收敛色板（暗色 + 一金 + 一红），克制装饰（几乎不用阴影，靠色阶分层），把视觉重量让给数据排版。中国战队的高光是情感锚点，但表达方式是"冷静地把它放在射灯下"，而非口号或煽动。
 
 明确拒绝：SaaS landing 套路（大渐变 hero、玻璃卡片堆、emoji 当图标、轮播）、普通 wiki 丑（密集蓝链接表格 + 零氛围）、臃肿电竞门户（荧光色 + 闪烁 + 动画乱跳）、商业彩媒（弹窗 + 订阅 + 营销 CTA 喧宾夺主）。一句话：**不套路、不臃肿、不丑、不卖货。**
 
 **Key Characteristics:**
-- 暗色为底（obsidian-void），三段色阶分层（void / panel / subtle），几乎不用阴影。
-- 一金（不朽盾金）一红（朱砂信号）双强调，金主红辅，用得稀才有力。
+- 暗色为底（obsidian-void），三段暖黑色阶分层（void / panel / subtle），不用默认玻璃感。
+- 一铜金（不朽盾金）一 Dota 红双强调，红主氛围、金主荣耀，用得稀才有力。
 - 数据排版优先：等宽数字、黑体大字编号、信息密度高于装饰。
 - 移动优先单列，桌面 max 1200 分栏，表格横向滚动不拆碎。
 - 沉浸但克制：入场/揭示动效允许，但每段服务于"让某事实被看见"，永不闪烁/发光泛滥。
 
-## 2. Colors: The Vault Palette
+## 2. Colors: The Dota Vault Palette
 
-暗色奖杯陈列馆的色板：一片暗渊里，一束金光打在奖杯上，一抹朱砂标出中国。
+暗色奖杯陈列馆的色板参考 Dota 2 官网：黑色页面底、炭灰内容面、红锈火光、少量铜金高光。避免旧版青紫霓虹，避免泛电竞荧光感。
 
 ### Primary
-- **不朽盾金 Aegis Gold** (#facc15): 冠军、奖金、最高强调。仅用于"值得被托起"的元素：冠军名次、CTA 主按钮、数据高光、奖金条。用得稀才贵重，单屏 ≤10%。
+- **不朽盾金 Aegis Gold** (#d5974b): 冠军、奖金、最高强调。仅用于"值得被托起"的元素：冠军名次、CTA 主按钮、数据高光、奖金条。用得稀才贵重，单屏 ≤10%。
 
 ### Secondary
-- **朱砂信号 Crimson Signal** (#dc2626): 中国战队专用标识色。与金色形成情感对比（金=冠军荣耀，朱砂=中国热血）。用于中国战队 chip、中国专题边框、亚军高光。仅标记中国相关，不滥用。
+- **Dota Red / Crimson Signal** (#b23125): 官网语境的主氛围色，也是中国战队标识色。用于中国战队 chip、中国专题边框、hero 热区与关键 hover。需要文字时使用更亮的 **Crimson Bright** (#ec553d)。
+- **Ember** (#de5826): 火光辅助色，只用于背景热区、渐变末端与少量动态图表温度，不作为文字主色。
 
 ### Neutral
-- **暗渊黑 Obsidian Void** (#09090b): 全站底色。最深、最静。
-- **展柜面板 Vault Panel** (#18181b): 卡片/表面背景。比底色亮一阶，形成展柜分层。
-- **暗格 Vault Subtle** (#1f1f23): chip 背景、hover 态、嵌套表面。三段色阶的最浅档。
-- **亮墨 Ink Bright** (#f4f4f5): 正文与标题主色。对暗渊黑对比 ≈17:1，远超 AA。
-- **灰墨 Ink Mute** (#a1a1aa): 次要文本、标签、辅助信息。对暗渊黑对比 ≈7:1，达标 AA。
-- **边线 Edge Faint** (#27272a): 边框、分割线。极低对比，只勾勒不抢戏。
+- **暗渊黑 Obsidian Void** (#080706): 全站底色。接近官网黑底，最深、最静。
+- **展柜面板 Vault Panel** (#151210): 卡片/表面背景。比底色亮一阶，带微暖褐色。
+- **暗格 Vault Subtle** (#221d19): chip 背景、hover 态、嵌套表面。三段色阶的最浅档。
+- **亮墨 Ink Bright** (#f1eae0): 正文与标题主色。对暗渊黑远超 AA。
+- **灰墨 Ink Mute** (#b4a89a): 次要文本、标签、辅助信息。保留暖灰，不用冷蓝灰。
+- **边线 Edge Faint** (#41342b): 边框、分割线。低对比铜褐边，只勾勒不抢戏。
 
 ### Named Rules
 **The One Spotlight Rule.** 不朽盾金是唯一的射灯。任何屏幕金色面积 ≤10%。冠军值得金，亚军以下不得镀金。金色泛滥 = 奖杯贬值。
 
-**The Crimson Single-Meaning Rule.** 朱砂信号只标记"中国"。不用于错误态、不用于警告、不用于普通强调。用户看到朱砂 = 这里在讲中国战队。
+**The Crimson Meaning Rule.** 红色承担两层语义：大面积时是 Dota 氛围光，小面积 chip/边框时标记"中国战队"。不要把红色用于错误态或普通警告，避免语义污染。
 
-**The Tonal-Only Depth Rule.** 纵深只靠 void→panel→subtle 三段色阶传达。默认无阴影。卡片是"更亮的暗格"，不是"浮起的物体"。
+**The Tonal-Only Depth Rule.** 纵深只靠 void→panel→subtle 三段暖黑色阶传达。默认无阴影。卡片是"更亮的暗格"，不是"浮起的物体"。
 
 ## 3. Typography
 
@@ -144,7 +147,7 @@ components:
 
 ## 4. Elevation
 
-这个系统**默认扁平**。纵深不靠阴影，靠 void→panel→subtle 三段暗色色阶：底色最暗，卡片面板亮一阶，hover/subtle 再亮一阶。展柜式分层，不是悬浮式投影。
+这个系统**默认扁平**。纵深不靠阴影，靠 void→panel→subtle 三段暖黑色阶：底色最暗，卡片面板亮一阶，hover/subtle 再亮一阶。展柜式分层，不是悬浮式投影。
 
 ### Shadow Vocabulary
 默认无 box-shadow。仅一种状态阴影，且极克制：
@@ -162,20 +165,20 @@ components:
 
 ### Buttons
 - **Shape:** 微圆角（10px md），非全圆。
-- **Primary:** 不朽盾金底（#facc15）+ 暗渊黑字（#09090b），padding 10px 20px。仅"浏览历届赛事"这类主行动用。hover 降透明度 0.9，不抬升。
+- **Primary:** 不朽盾金底（#d5974b）+ 暗渊黑字（#080706），padding 10px 20px。仅"浏览历届赛事"这类主行动用。hover 降透明度 0.9，不抬升。
 - **Ghost:** 透明底 + 边线 + 亮墨字。次要行动。hover 边框转金 60%。
 - **Never:** 不配 1px 边框 + 宽投影；不全圆胶囊；不发光。
 
 ### Chips
 - **Style:** 全圆胶囊（pill），底=暗格 subtle，字=灰墨 mute，padding 2px 10px，0.75rem。
-- **chip-gold:** 不朽盾金底 + 暗渊黑字——仅冠军/顶级高光。
-- **chip-red:** 朱砂 10% 透明底 + 朱砂字——仅中国战队标识。
+- **chip-gold:** 铜金底/描边 + 暗渊黑或铜金字——仅冠军/顶级高光。
+- **chip-red:** Dota 红 10% 透明底 + Crimson Bright 字——仅中国战队标识。
 - **State:** 纯标记，非交互（除非做筛选 chip 时加 hover 边框转金）。
 
 ### Cards / Containers
 - **Corner:** 12px lg。
-- **Background:** 展柜面板 #18181b（半透 80% + backdrop-blur，玻璃感克制使用，非默认泛滥）。
-- **Border:** 1px 边线 #27272a。hover 转金 60%。
+- **Background:** 展柜面板 #151210，带极轻铜金角光，不做默认玻璃卡。
+- **Border:** 1px 边线 #41342b。hover 转金 60%。
 - **Padding:** 16px（sm 卡）/ 20px（内容卡）。
 - **Shadow:** 无（见 Elevation）。嵌套卡片禁止——用内部分割线（divide-edge）而非套娃卡。
 
@@ -207,9 +210,9 @@ components:
 
 ### Don't:
 - **Don't** 滥用金色——亚军及以下不得镀金。金色泛滥 = 奖杯贬值。
-- **Don't** 用朱砂信号标记非中国内容（The Crimson Single-Meaning Rule）。
+- **Don't** 把 Dota 红用于错误/警告/普通强调；小面积红色默认表示中国战队（The Crimson Meaning Rule）。
 - **Don't** 给卡片加侧色条（border-left/right >1px 彩条）——禁的模式，用整边框或色阶代替。
-- **Don't** 做玻璃卡片堆——backdrop-blur 仅极克制用于顶栏与卡背景，不当默认装饰泛滥。
+- **Don't** 做玻璃卡片堆——backdrop-blur 仅极克制用于顶栏，不当默认装饰泛滥。
 - **Don't** 做 SaaS landing 套路：大渐变 hero、emoji 当核心图标、轮播证言、"AI made that"。
 - **Don't** 做臃肿电竞门户：荧光色、闪烁文字、动画乱跳、信息被装饰淹没。
 - **Don't** 做普通 wiki 丑：密集蓝链接表格 + 零氛围 + 无层次排版。

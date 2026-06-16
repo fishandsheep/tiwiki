@@ -34,6 +34,7 @@ export const teams = sqliteTable('teams', {
   region: text('region'),
   country: text('country'),
   logo: text('logo').default(''),
+  logoSourceUrl: text('logo_source_url').default(''),
   descriptionZh: text('description_zh').default(''),
   liquipediaUrl: text('liquipedia_url'),
 })
@@ -44,6 +45,8 @@ export const players = sqliteTable('players', {
   realName: text('real_name'),
   country: text('country'),
   region: text('region'),
+  avatar: text('avatar').default(''),
+  avatarSourceUrl: text('avatar_source_url').default(''),
   // 1-5 = 位置;coach/standin
   position: text('position'),
   liquipediaUrl: text('liquipedia_url'),
@@ -83,6 +86,8 @@ export const participants = sqliteTable(
       .references(() => teams.id),
     region: text('region'),
     country: text('country'),
+    teamLogo: text('team_logo').default(''),
+    teamLogoSourceUrl: text('team_logo_source_url').default(''),
     inviteType: text('invite_type'), // 直接邀请 / xx区预选 / 外卡赛
     seed: text('seed'),
   },
@@ -108,6 +113,9 @@ export const rosters = sqliteTable(
       .notNull()
       .references(() => players.id),
     role: text('role'), // 核心一/二号位/.../教练/替补
+    playerAvatar: text('player_avatar').default(''),
+    playerAvatarSourceUrl: text('player_avatar_source_url').default(''),
+    playerCountry: text('player_country').default(''),
   },
   (t) => ({
     uniqRoster: uniqueIndex('rosters_tournament_team_player_unique').on(

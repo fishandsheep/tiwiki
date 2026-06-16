@@ -202,6 +202,8 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       tournamentId: schema.participants.tournamentId,
       teamId: schema.participants.teamId,
       teamName: schema.teams.name,
+      teamLogo: schema.participants.teamLogo,
+      fallbackLogo: schema.teams.logo,
       region: schema.participants.region,
       teamRegion: schema.teams.region,
       country: schema.participants.country,
@@ -216,6 +218,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     tournamentId: row.tournamentId,
     teamId: row.teamId,
     teamName: row.teamName,
+    teamLogo: row.teamLogo || row.fallbackLogo || '',
     region: translateRegion(row.region || row.teamRegion || ''),
     country: row.country || '',
     inviteType: translateInviteType(row.inviteType || '', row.region || row.teamRegion || ''),
@@ -229,11 +232,20 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       rank: schema.placements.rank,
       teamId: schema.placements.teamId,
       teamName: schema.teams.name,
+      teamLogo: schema.participants.teamLogo,
+      fallbackLogo: schema.teams.logo,
       prizeUsd: schema.placements.prizeUsd,
       isChinaTeam: schema.placements.isChinaTeam,
     })
     .from(schema.placements)
     .innerJoin(schema.teams, eq(schema.placements.teamId, schema.teams.id))
+    .leftJoin(
+      schema.participants,
+      and(
+        eq(schema.placements.tournamentId, schema.participants.tournamentId),
+        eq(schema.placements.teamId, schema.participants.teamId),
+      ),
+    )
     .where(eq(schema.placements.tournamentId, tournament.id))
     .orderBy(asc(schema.placements.rank), asc(schema.teams.name))
 
@@ -242,6 +254,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     rank: row.rank,
     teamId: row.teamId,
     teamName: row.teamName,
+    teamLogo: row.teamLogo || row.fallbackLogo || participantMap.get(row.teamId)?.teamLogo || '',
     prizeUsd: row.prizeUsd || 0,
     isChinaTeam: !!row.isChinaTeam,
     region: participantMap.get(row.teamId)?.region || '',
@@ -252,13 +265,26 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     .select({
       teamId: schema.rosters.teamId,
       teamName: schema.teams.name,
+      teamLogo: schema.participants.teamLogo,
+      fallbackLogo: schema.teams.logo,
       handle: schema.players.handle,
       playerId: schema.players.id,
       role: schema.rosters.role,
+      playerAvatar: schema.rosters.playerAvatar,
+      fallbackAvatar: schema.players.avatar,
+      playerCountry: schema.rosters.playerCountry,
+      fallbackCountry: schema.players.country,
     })
     .from(schema.rosters)
     .innerJoin(schema.teams, eq(schema.rosters.teamId, schema.teams.id))
     .innerJoin(schema.players, eq(schema.rosters.playerId, schema.players.id))
+    .leftJoin(
+      schema.participants,
+      and(
+        eq(schema.rosters.tournamentId, schema.participants.tournamentId),
+        eq(schema.rosters.teamId, schema.participants.teamId),
+      ),
+    )
     .where(eq(schema.rosters.tournamentId, tournament.id))
     .orderBy(asc(schema.teams.name), asc(schema.rosters.id))
 
@@ -271,6 +297,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
         teamName: row.teamName,
         inviteType: participant?.inviteType || '',
         region: participant?.region || '',
+        teamLogo: row.teamLogo || row.fallbackLogo || participant?.teamLogo || '',
         players: [],
       })
     }
@@ -279,6 +306,8 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       playerId: row.playerId,
       handle: row.handle,
       role: row.role || '',
+      country: row.playerCountry || row.fallbackCountry || '',
+      avatar: row.playerAvatar || row.fallbackAvatar || '',
     } satisfies RosterEntry)
   }
 
@@ -362,6 +391,7 @@ export async function getRankings(): Promise<RankingsData> {
           handle: schema.players.handle,
           country: schema.players.country,
           region: schema.players.region,
+          avatar: schema.players.avatar,
         })
         .from(schema.rosters)
         .innerJoin(schema.players, eq(schema.rosters.playerId, schema.players.id))
@@ -385,6 +415,7 @@ export async function getRankings(): Promise<RankingsData> {
       handle: row.handle,
       country: row.country || '',
       region: row.region || '',
+      avatar: row.avatar || '',
       championshipCount: 0,
       championshipTiNos: [],
       championshipYears: [],

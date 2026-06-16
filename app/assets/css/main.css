@@ -4,21 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Design tokens (dark esports).
+/* ===== Design tokens (Dota 2 official-site inspired).
    Colors stored as space-separated RGB channels so Tailwind alpha modifiers
    (e.g. bg-bg-card/80) work via rgb(var(--x) / <alpha-value>). ===== */
 :root {
-  --bg-main: 5 9 18; /* #050912 — cold esports navy */
-  --bg-card: 10 18 32; /* #0a1220 */
-  --bg-subtle: 15 27 48; /* #0f1b30 */
-  --text-main: 229 244 255; /* #e5f4ff */
-  --text-muted: 137 163 190; /* #89a3be */
-  --gold: 41 224 255; /* #29e0ff — primary neon cyan */
-  --red: 112 76 255; /* #704cff — violet accent */
-  --red-bright: 177 107 255; /* #b16bff */
-  --ember: 0 132 255; /* #0084ff */
-  --teal: 44 255 196; /* #2cffc4 */
-  --border: 36 62 92; /* #243e5c */
+  --bg-main: 8 7 6; /* #080706 — near-black battle backdrop */
+  --bg-card: 21 18 16; /* #151210 */
+  --bg-subtle: 34 29 25; /* #221d19 */
+  --text-main: 241 234 224; /* #f1eae0 */
+  --text-muted: 180 168 154; /* #b4a89a */
+  --gold: 213 151 75; /* #d5974b — brass highlight */
+  --red: 178 49 37; /* #b23125 — Dota red */
+  --red-bright: 236 85 61; /* #ec553d */
+  --ember: 222 88 38; /* #de5826 */
+  --teal: 126 103 77; /* #7e674d — smoky bronze support */
+  --border: 65 52 43; /* #41342b */
 }
 
 html {
@@ -32,17 +32,19 @@ body {
   font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 12% 8%, rgb(var(--red) / 0.22), transparent 30rem),
-    radial-gradient(circle at 88% 0%, rgb(var(--gold) / 0.16), transparent 34rem),
-    radial-gradient(circle at 50% 120%, rgb(var(--teal) / 0.08), transparent 30rem),
-    linear-gradient(180deg, rgb(4 12 28), rgb(var(--bg-main)) 24rem);
+    radial-gradient(circle at 12% 8%, rgb(var(--red) / 0.2), transparent 30rem),
+    radial-gradient(circle at 88% 0%, rgb(var(--gold) / 0.14), transparent 34rem),
+    radial-gradient(circle at 50% 120%, rgb(var(--ember) / 0.1), transparent 30rem),
+    linear-gradient(180deg, rgb(21 13 10), rgb(var(--bg-main)) 24rem);
 }
 
 /* Glass card surface */
 @layer components {
   .card {
-    @apply rounded-xl border border-edge bg-bg-card/80 shadow-[0_18px_50px_rgb(0_0_0/0.24)] backdrop-blur-sm;
-    background-image: linear-gradient(145deg, rgb(255 255 255 / 0.055), transparent 46%);
+    @apply rounded-xl border border-edge bg-bg-card/90;
+    background-image:
+      linear-gradient(145deg, rgb(var(--gold) / 0.045), transparent 42%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.026), transparent 60%);
   }
   .card-hover {
     @apply transition-colors hover:border-gold/70;
@@ -63,7 +65,7 @@ body {
     letter-spacing: 0.14em;
     text-transform: lowercase;
     color: rgb(var(--gold));
-    text-shadow: 0 0 18px rgb(var(--gold) / 0.16);
+    text-shadow: 0 0 18px rgb(var(--red) / 0.18);
   }
   .ti-hero {
     isolation: isolate;
@@ -82,14 +84,14 @@ body {
     background-image: url('/hero-shanghai-2026.svg');
     background-position: center;
     background-size: cover;
-    filter: blur(7px) saturate(0.92) hue-rotate(155deg) contrast(1.12) brightness(0.72);
+    filter: blur(6px) saturate(0.9) contrast(1.14) brightness(0.62);
     transform: translate3d(var(--hero-bg-x), var(--hero-bg-y), 0) scale(1.07) rotate(var(--hero-rotate));
     transition: transform 240ms var(--ease-out-quart), filter 240ms var(--ease-out-quart);
     animation: hero-dream-drift 14s ease-in-out infinite alternate;
     will-change: transform, filter;
   }
   .ti-hero:hover .ti-hero-backdrop {
-    filter: blur(5px) saturate(1.05) hue-rotate(155deg) contrast(1.18) brightness(0.82);
+    filter: blur(5px) saturate(1) contrast(1.2) brightness(0.7);
   }
   .ti-hero::before {
     content: "";
@@ -97,9 +99,9 @@ body {
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(90deg, rgb(var(--bg-main) / 0.94) 0%, rgb(var(--bg-main) / 0.68) 47%, rgb(5 19 42 / 0.4) 100%),
-      radial-gradient(circle at 18% 24%, rgb(var(--gold) / 0.2), transparent 24rem),
-      radial-gradient(circle at 78% 42%, rgb(var(--red-bright) / 0.2), transparent 30rem),
+      linear-gradient(90deg, rgb(var(--bg-main) / 0.94) 0%, rgb(var(--bg-main) / 0.72) 47%, rgb(42 15 11 / 0.42) 100%),
+      radial-gradient(circle at 18% 24%, rgb(var(--gold) / 0.18), transparent 24rem),
+      radial-gradient(circle at 78% 42%, rgb(var(--red-bright) / 0.22), transparent 30rem),
       linear-gradient(180deg, rgb(0 0 0 / 0.18), rgb(var(--bg-main) / 0.46));
   }
   .ti-hero::after {
@@ -108,10 +110,10 @@ body {
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(115deg, transparent 0 43%, rgb(var(--gold) / 0.22) 45%, transparent 47% 100%),
-      repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 9px);
+      linear-gradient(118deg, transparent 0 42%, rgb(var(--red) / 0.2) 44%, rgb(var(--gold) / 0.16) 45%, transparent 48% 100%),
+      radial-gradient(ellipse at 50% 115%, rgb(var(--ember) / 0.16), transparent 44%);
     mix-blend-mode: screen;
-    opacity: 0.48;
+    opacity: 0.5;
   }
   .ti-hero-glow {
     overflow: hidden;
@@ -122,11 +124,30 @@ body {
     --hero-hot-x: 0px;
     --hero-hot-y: 0px;
     background:
-      radial-gradient(ellipse 42% 72% at calc(18% + var(--hero-glow-x)) calc(4% + var(--hero-glow-y)), rgb(var(--gold) / 0.24) 0, transparent 58%),
-      radial-gradient(ellipse 42% 58% at calc(78% + var(--hero-hot-x)) calc(45% + var(--hero-hot-y)), rgb(var(--red-bright) / 0.22) 0, transparent 62%),
-      radial-gradient(circle at 52% 108%, rgb(var(--teal) / 0.12), transparent 36%);
+      radial-gradient(ellipse 42% 72% at calc(18% + var(--hero-glow-x)) calc(4% + var(--hero-glow-y)), rgb(var(--gold) / 0.2) 0, transparent 58%),
+      radial-gradient(ellipse 42% 58% at calc(78% + var(--hero-hot-x)) calc(45% + var(--hero-hot-y)), rgb(var(--red-bright) / 0.24) 0, transparent 62%),
+      radial-gradient(circle at 52% 108%, rgb(var(--ember) / 0.12), transparent 36%);
   }
 
+}
+
+@media (pointer: coarse) {
+  .ti-hero {
+    cursor: auto;
+  }
+  .ti-hero-backdrop {
+    animation: none;
+    filter: blur(3px) saturate(0.88) contrast(1.1) brightness(0.64);
+    transform: scale(1.04);
+    transition: none;
+    will-change: auto;
+  }
+  .ti-hero:hover .ti-hero-backdrop {
+    filter: blur(3px) saturate(0.88) contrast(1.1) brightness(0.64);
+  }
+  .ti-hero::after {
+    opacity: 0.38;
+  }
 }
 
 /* Thin scrollbar for horizontal-scroll tables */

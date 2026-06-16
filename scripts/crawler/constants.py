@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CACHE_DIR = ROOT / ".cache" / "crawler"
 DB_PATH = ROOT / "data" / "ti.db"
+MEDIA_DIR = ROOT / "public" / "media" / "liquipedia"
 TOURNAMENTS_JSON = ROOT / "app" / "data" / "tournaments.json"
 TEAMS_JSON = ROOT / "app" / "data" / "teams.json"
 

@@ -3,7 +3,7 @@
     class="sticky top-0 z-40 border-b border-edge bg-bg-main/85 backdrop-blur-md"
   >
     <div class="mx-auto flex h-14 max-w-shell items-center gap-4 px-4">
-      <NuxtLink to="/" class="flex items-center gap-2">
+      <NuxtLink to="/" class="flex min-h-11 items-center gap-2">
         <span
           class="ti-wordmark grid h-8 w-8 place-items-center rounded-md bg-gold text-sm text-bg-main"
           >ti</span

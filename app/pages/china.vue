@@ -2,9 +2,9 @@
   <div class="mx-auto max-w-shell px-4 py-8">
     <header v-reveal class="reveal mb-6">
       <span class="chip chip-red">🇨🇳 中国战队专题</span>
-      <h1 class="mt-3 text-2xl font-black text-ink-main sm:text-3xl">中国战队的 ti 征程</h1>
+      <h1 class="mt-3 text-2xl font-black text-ink-main sm:text-3xl">中国战队的 Ti征程</h1>
       <p class="mt-1 max-w-2xl text-sm text-ink-muted">
-        中国 Dota 在 ti 赛场屡创辉煌。以下为各届中国战队的最佳成绩。
+        中国 Dota 在 Ti赛场屡创辉煌。以下为各届中国战队的最佳成绩。
       </p>
     </header>
 
@@ -36,12 +36,12 @@
           v-for="c in orderedByTi"
           :key="c.tiNo"
           :to="`/ti/${c.routeId}`"
-          class="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-bg-subtle"
+          class="grid min-w-0 grid-cols-[3.75rem_1fr] gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-bg-subtle sm:flex sm:items-center sm:gap-4"
         >
-          <span class="w-16 font-black" :class="c.bestRank === 1 ? 'text-gold' : 'text-ink-main'">{{ formatTiLabel(c.tiNo) }}</span>
-          <span class="w-14 text-xs text-ink-muted">{{ c.year }}</span>
-          <span class="flex-1 truncate text-sm font-medium text-ink-main">{{ c.bestTeamName }}</span>
-          <span class="chip" :class="chipClass(c.bestRank)">{{ c.bestPlacement }}</span>
+          <span class="font-black sm:w-16" :class="c.bestRank === 1 ? 'text-gold' : 'text-ink-main'">{{ formatTiLabel(c.tiNo) }}</span>
+          <span class="min-w-0 truncate text-sm font-medium text-ink-main sm:flex-1">{{ c.bestTeamName }}</span>
+          <span class="text-xs text-ink-muted sm:w-14">{{ c.year }}</span>
+          <span class="chip justify-self-start" :class="chipClass(c.bestRank)">{{ c.bestPlacement }}</span>
         </NuxtLink>
       </div>
     </section>
@@ -64,5 +64,5 @@ function chipClass(rank: number) {
   return ''
 }
 
-useHead({ title: '中国战队 — ti 百科' })
+useHead({ title: '中国战队 — Ti百科' })
 </script>

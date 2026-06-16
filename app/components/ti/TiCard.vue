@@ -1,18 +1,18 @@
 <template>
   <NuxtLink
     :to="`/ti/${tournament.routeId}`"
-    class="card card-hover reveal block p-4"
+    class="card card-hover reveal block p-4 lg:p-5"
   >
     <div class="flex items-baseline justify-between">
-      <span class="text-lg font-black text-gold">
+      <span class="text-lg font-black text-gold lg:text-xl">
         {{ tournament.status === 'cancelled' ? tournament.year : formatTiLabel(tournament.tiNo) }}
       </span>
-      <span class="text-xs text-ink-muted">{{ tournament.year }}</span>
+      <span class="text-xs text-ink-muted lg:text-sm">{{ tournament.year }}</span>
     </div>
 
-    <p class="mt-0.5 truncate text-sm text-ink-muted">{{ tournament.nameZh }}</p>
+    <p class="mt-0.5 truncate text-sm text-ink-muted lg:text-base">{{ tournament.nameZh }}</p>
 
-    <dl class="mt-3 space-y-1.5 text-sm">
+    <dl class="mt-3 space-y-1.5 text-sm lg:text-base">
       <div class="flex justify-between gap-2">
         <dt class="shrink-0 text-ink-muted">冠军</dt>
         <dd class="min-w-0 truncate text-right font-medium text-ink-main">{{ tournament.champion }}</dd>
@@ -23,7 +23,7 @@
       </div>
       <div class="flex justify-between gap-2">
         <dt class="text-ink-muted">奖金池</dt>
-        <dd class="font-mono text-xs text-ink-main">{{ formatUsd(tournament.prizePoolUsd) }}</dd>
+        <dd class="font-mono text-xs text-ink-main lg:text-sm">{{ formatUsd(tournament.prizePoolUsd) }}</dd>
       </div>
     </dl>
 

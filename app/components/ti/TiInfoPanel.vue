@@ -2,20 +2,20 @@
   <aside class="reveal lg:sticky lg:top-16">
     <div class="card overflow-hidden">
       <!-- 冠军 -->
-      <div class="border-b border-edge bg-gold/5 p-4">
-        <p class="text-xs uppercase tracking-wide text-gold">冠军 · Champion</p>
-        <p class="mt-1 text-lg font-black text-ink-main">{{ t.champion }}</p>
+      <div class="border-b border-edge bg-gold/5 p-4 lg:p-5">
+        <p class="text-xs uppercase tracking-wide text-gold lg:text-sm">冠军 · Champion</p>
+        <p class="mt-1 text-lg font-black text-ink-main lg:text-xl">{{ t.champion }}</p>
       </div>
       <!-- 亚军 -->
-      <div class="border-b border-edge p-4">
-        <p class="text-xs uppercase tracking-wide text-ink-muted">亚军 · Runner-up</p>
-        <p class="mt-1 text-base font-bold text-ink-muted">{{ t.runnerUp }}</p>
+      <div class="border-b border-edge p-4 lg:p-5">
+        <p class="text-xs uppercase tracking-wide text-ink-muted lg:text-sm">亚军 · Runner-up</p>
+        <p class="mt-1 text-base font-bold text-ink-muted lg:text-lg">{{ t.runnerUp }}</p>
       </div>
 
       <dl class="divide-y divide-edge">
-        <div v-for="r in rows" :key="r.label" class="grid grid-cols-[5rem_1fr] gap-3 px-4 py-2.5 sm:flex sm:justify-between">
-          <dt class="text-sm text-ink-muted">{{ r.label }}</dt>
-          <dd class="min-w-0 text-right text-sm font-medium text-ink-main break-words">{{ r.value }}</dd>
+        <div v-for="r in rows" :key="r.label" class="grid grid-cols-1 gap-1 px-4 py-3 sm:grid-cols-[5rem_1fr] sm:gap-3 lg:px-5 lg:py-4">
+          <dt class="text-sm text-ink-muted lg:text-base">{{ r.label }}</dt>
+          <dd class="min-w-0 break-words text-sm font-medium text-ink-main sm:text-right lg:text-base">{{ r.value }}</dd>
         </div>
       </dl>
     </div>

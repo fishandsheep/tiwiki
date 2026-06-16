@@ -33,6 +33,12 @@ def get_param(template: Any, name: str, default: str = "") -> str:
     return default
 
 
+def get_raw_param(template: Any, name: str, default: str = "") -> str:
+    if template.has(name):
+        return str(template.get(name).value).strip()
+    return default
+
+
 def parse_number(value: str) -> int:
     digits = re.sub(r"[^0-9]", "", value)
     return int(digits) if digits else 0
@@ -144,15 +150,42 @@ def qualification_text(raw: str) -> str:
     return ""
 
 
-def upsert_player(players: dict[str, dict[str, Any]], handle: str) -> str:
+def extract_country_from_template(template: Any) -> str:
+    for name in ("flag", "country", "nat", "nationality"):
+        value = get_param(template, name)
+        if value:
+            return value
+    raw = str(template)
+    match = re.search(r"\{\{[Ff]lag\|([^}|]+)", raw)
+    return strip_code(match.group(1)) if match else ""
+
+
+def extract_image_param(template: Any) -> str:
+    for name in ("image", "img", "logo", "teamlogo", "file"):
+        value = get_raw_param(template, name)
+        if value:
+            return strip_code(value)
+    return ""
+
+
+def upsert_player(
+    players: dict[str, dict[str, Any]],
+    handle: str,
+    country: str = "",
+    avatar: str = "",
+    avatar_source_url: str = "",
+) -> str:
     player_id = slugify(handle)
+    existing = players.get(player_id, {})
     players[player_id] = {
         "id": player_id,
         "handle": handle,
-        "real_name": "",
-        "country": "",
-        "region": "",
-        "position": "",
+        "real_name": existing.get("real_name", ""),
+        "country": existing.get("country") or country,
+        "region": existing.get("region", ""),
+        "avatar": existing.get("avatar") or avatar,
+        "avatar_source_url": existing.get("avatar_source_url") or avatar_source_url,
+        "position": existing.get("position", ""),
         "liquipedia_url": f"https://liquipedia.net/dota2/{handle.replace(' ', '_')}",
     }
     return player_id
@@ -178,13 +211,15 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
         country = seed.country if seed and seed.country else ("中国" if region == "中国" else "")
         invite_type = qualifier or "Invited"
 
+        team_logo = extract_image_param(template)
         teams[team_id] = {
             "id": team_id,
             "name": team_name,
             "name_zh": seed.name_zh if seed and seed.name_zh else team_name,
             "region": seed.region if seed and seed.region else region,
             "country": seed.country if seed and seed.country else country,
-            "logo": "",
+            "logo": team_logo,
+            "logo_source_url": "",
             "description_zh": seed.description_zh if seed else "",
             "liquipedia_url": f"https://liquipedia.net/dota2/{team_name.replace(' ', '_')}",
         }
@@ -197,6 +232,8 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                 "team_name": team_name,
                 "region": region,
                 "country": country,
+                "team_logo": team_logo,
+                "team_logo_source_url": "",
                 "invite_type": invite_type,
                 "placement": get_param(template, "placement"),
             }
@@ -206,22 +243,33 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
             handle = get_param(template, f"p{idx}")
             if not handle:
                 continue
-            player_id = upsert_player(players, handle)
-            rosters.append({"team_id": team_id, "player_id": player_id, "role": f"{idx} 号位"})
+            player_country = get_param(template, f"p{idx}flag") or get_param(template, f"p{idx}country")
+            player_avatar = get_param(template, f"p{idx}image") or get_param(template, f"p{idx}img")
+            player_id = upsert_player(players, handle, player_country, player_avatar)
+            rosters.append(
+                {
+                    "team_id": team_id,
+                    "player_id": player_id,
+                    "role": f"{idx} 号位",
+                    "player_country": player_country,
+                    "player_avatar": player_avatar,
+                    "player_avatar_source_url": "",
+                }
+            )
 
         for coach_key in ("c", "c2", "coach", "coach2"):
             handle = get_param(template, coach_key)
             if not handle:
                 continue
             player_id = upsert_player(players, handle)
-            rosters.append({"team_id": team_id, "player_id": player_id, "role": "教练"})
+            rosters.append({"team_id": team_id, "player_id": player_id, "role": "教练", "player_country": "", "player_avatar": "", "player_avatar_source_url": ""})
 
         for sub_key in ("s1", "s2", "sub1", "sub2"):
             handle = get_param(template, sub_key)
             if not handle:
                 continue
             player_id = upsert_player(players, handle)
-            rosters.append({"team_id": team_id, "player_id": player_id, "role": "替补"})
+            rosters.append({"team_id": team_id, "player_id": player_id, "role": "替补", "player_country": "", "player_avatar": "", "player_avatar_source_url": ""})
 
     for template in code.filter_templates(recursive=True):
         if clean_template_name(template) != "teamparticipants":
@@ -239,13 +287,15 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
             invite_type = qualification_text(str(opponent.get("qualification").value)) if opponent.has("qualification") else "Invited"
             region = infer_region(invite_type, seed, team_name)
             country = seed.country if seed and seed.country else ("中国" if region == "中国" else "")
+            team_logo = extract_image_param(opponent)
             teams[team_id] = {
                 "id": team_id,
                 "name": team_name,
                 "name_zh": seed.name_zh if seed and seed.name_zh else team_name,
                 "region": seed.region if seed and seed.region else region,
                 "country": seed.country if seed and seed.country else country,
-                "logo": "",
+                "logo": team_logo,
+                "logo_source_url": "",
                 "description_zh": seed.description_zh if seed else "",
                 "liquipedia_url": f"https://liquipedia.net/dota2/{team_name.replace(' ', '_')}",
             }
@@ -257,6 +307,8 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                     "team_name": team_name,
                     "region": region,
                     "country": country,
+                    "team_logo": team_logo,
+                    "team_logo_source_url": "",
                     "invite_type": invite_type or "Invited",
                     "placement": "",
                 }
@@ -279,14 +331,25 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                 if not handle:
                     continue
                 role = get_param(person, "role") or "选手"
-                player_id = upsert_player(players, handle)
+                player_country = extract_country_from_template(person)
+                player_avatar = extract_image_param(person)
+                player_id = upsert_player(players, handle, player_country, player_avatar)
                 if role == "coach":
                     role_label = "教练"
                 elif role.isdigit():
                     role_label = f"{role} 号位"
                 else:
                     role_label = role
-                rosters.append({"team_id": team_id, "player_id": player_id, "role": role_label})
+                rosters.append(
+                    {
+                        "team_id": team_id,
+                        "player_id": player_id,
+                        "role": role_label,
+                        "player_country": player_country,
+                        "player_avatar": player_avatar,
+                        "player_avatar_source_url": "",
+                    }
+                )
 
     return participants, alias_to_team_id, list(players.values()), rosters, teams
 
@@ -432,6 +495,7 @@ def parse_placements_from_html(html: str, teams: dict[str, dict[str, Any]], part
                         "region": seed.region if seed and seed.region else "",
                         "country": seed.country if seed and seed.country else "",
                         "logo": "",
+                        "logo_source_url": "",
                         "description_zh": seed.description_zh if seed else "",
                         "liquipedia_url": f"https://liquipedia.net/dota2/{team_name.replace(' ', '_')}",
                     }
@@ -446,6 +510,66 @@ def parse_placements_from_html(html: str, teams: dict[str, dict[str, Any]], part
                 }
             )
     return placements
+
+
+def image_src(node: Any) -> str:
+    if not node:
+        return ""
+    return node.get("src") or node.get("data-src") or ""
+
+
+def enrich_participant_media_from_html(html: str, teams: dict[str, dict[str, Any]], participants: list[dict[str, Any]]) -> None:
+    soup = BeautifulSoup(html, "html.parser")
+    participant_by_team = {row["team_id"]: row for row in participants}
+    alias_to_team_id: dict[str, str] = {}
+    for team_id, team in teams.items():
+        for alias in team_aliases(team["name"], team_id, team.get("name_zh", "")):
+            alias_to_team_id[alias] = team_id
+
+    for block in soup.select(".block-team, .team-template-team, .team-template"):
+        name_node = block.select_one(".name a, a[title]")
+        team_name = name_node.get("title", "").strip() if name_node else block.get_text(" ", strip=True)
+        team_id = alias_to_team_id.get(compact(team_name)) or match_existing_team_id(team_name, teams)
+        if not team_id:
+            continue
+        src = image_src(block.select_one("img"))
+        if not src:
+            continue
+        teams[team_id]["logo"] = teams[team_id].get("logo") or src
+        participant = participant_by_team.get(team_id)
+        if participant:
+            participant["team_logo"] = participant.get("team_logo") or src
+
+
+def parse_player_profile(html: str) -> dict[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    result = {"avatar": "", "country": ""}
+    infobox = soup.select_one(".fo-nttax-infobox, .infobox, .fo-nttax")
+    image = infobox.select_one("img") if infobox else soup.select_one(".infobox img, .fo-nttax img")
+    result["avatar"] = image_src(image)
+    text = infobox.get_text(" ", strip=True) if infobox else soup.get_text(" ", strip=True)
+    country_match = re.search(r"(?:Country|Nationality)\s+([A-Za-z][A-Za-z .'-]+)", text)
+    if country_match:
+        result["country"] = country_match.group(1).strip()
+    flag = (infobox or soup).select_one(".flag img[alt], .flagicon img[alt]")
+    if flag and flag.get("alt"):
+        result["country"] = flag.get("alt", "").strip()
+    return result
+
+
+def parse_player_wikitext(wikitext: str) -> dict[str, str]:
+    result = {"avatar": "", "country": ""}
+    if not wikitext:
+        return result
+    code = mwparserfromhell.parse(wikitext)
+    for template in code.filter_templates(recursive=True):
+        name = clean_template_name(template)
+        if name not in {"infobox player", "infobox person", "player infobox"}:
+            continue
+        result["avatar"] = extract_image_param(template)
+        result["country"] = extract_country_from_template(template) or get_param(template, "country")
+        break
+    return result
 
 
 def parse_infobox(wikitext: str) -> dict[str, Any]:
