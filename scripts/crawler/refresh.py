@@ -74,11 +74,9 @@ def resolve_media(fetcher: WikiFetcher, raw: str, kind: str, slug: str) -> tuple
 def hydrate_media(fetcher: WikiFetcher, teams: dict[str, dict], participants: list[dict], players: list[dict], rosters: list[dict]) -> None:
     for participant in participants:
         team = teams.get(participant["team_id"])
-        raw_logo = participant.get("team_logo") or (team or {}).get("logo", "")
+        raw_logo = (team or {}).get("logo", "")
         logo, source = resolve_media(fetcher, raw_logo, "teams", participant["team_id"])
         if logo:
-            participant["team_logo"] = logo
-            participant["team_logo_source_url"] = source
             if team is not None:
                 team["logo"] = logo
                 team["logo_source_url"] = source
@@ -88,21 +86,18 @@ def hydrate_media(fetcher: WikiFetcher, teams: dict[str, dict], participants: li
         player = player_by_id.get(roster["player_id"])
         if player is None:
             continue
-        if not roster.get("player_avatar") or not roster.get("player_country"):
+        if not player.get("avatar") or not roster.get("player_country"):
             try:
                 raw = fetcher.fetch_wikitext(player["handle"].replace(" ", "_"))
                 profile = parse_player_wikitext(raw)
-                roster["player_avatar"] = roster.get("player_avatar") or profile.get("avatar", "")
                 roster["player_country"] = roster.get("player_country") or profile.get("country", "")
                 player["avatar"] = player.get("avatar") or profile.get("avatar", "")
                 player["country"] = player.get("country") or profile.get("country", "")
             except Exception as exc:  # noqa: BLE001
                 print(f"warn: profile fetch failed for {player['handle']}: {exc}", file=sys.stderr)
-        raw_avatar = roster.get("player_avatar") or player.get("avatar", "")
+        raw_avatar = player.get("avatar", "")
         avatar, source = resolve_media(fetcher, raw_avatar, "players", roster["player_id"])
         if avatar:
-            roster["player_avatar"] = avatar
-            roster["player_avatar_source_url"] = source
             player["avatar"] = avatar
             player["avatar_source_url"] = source
         if roster.get("player_country"):

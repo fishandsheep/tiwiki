@@ -48,6 +48,9 @@ class ParseTests(unittest.TestCase):
         self.assertIn("navi", teams)
         self.assertIn("ig", teams)
         self.assertIn("navi", alias_to_team_id.values())
+        self.assertTrue(all(player.get("homepage_url", "").startswith("https://liquipedia.net/dota2/") for player in players))
+        self.assertTrue(all("team_logo" not in row and "team_logo_source_url" not in row for row in participants))
+        self.assertTrue(all("player_avatar" not in row and "player_avatar_source_url" not in row for row in rosters))
 
     def test_2016_teamcard_and_prizepool_parse(self) -> None:
         wikitext = load_cached_wikitext(2016)

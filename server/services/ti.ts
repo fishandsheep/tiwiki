@@ -202,8 +202,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       tournamentId: schema.participants.tournamentId,
       teamId: schema.participants.teamId,
       teamName: schema.teams.name,
-      teamLogo: schema.participants.teamLogo,
-      fallbackLogo: schema.teams.logo,
+      teamLogo: schema.teams.logo,
       region: schema.participants.region,
       teamRegion: schema.teams.region,
       country: schema.participants.country,
@@ -218,7 +217,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     tournamentId: row.tournamentId,
     teamId: row.teamId,
     teamName: row.teamName,
-    teamLogo: row.teamLogo || row.fallbackLogo || '',
+    teamLogo: row.teamLogo || '',
     region: translateRegion(row.region || row.teamRegion || ''),
     country: row.country || '',
     inviteType: translateInviteType(row.inviteType || '', row.region || row.teamRegion || ''),
@@ -232,8 +231,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       rank: schema.placements.rank,
       teamId: schema.placements.teamId,
       teamName: schema.teams.name,
-      teamLogo: schema.participants.teamLogo,
-      fallbackLogo: schema.teams.logo,
+      teamLogo: schema.teams.logo,
       prizeUsd: schema.placements.prizeUsd,
       isChinaTeam: schema.placements.isChinaTeam,
     })
@@ -254,7 +252,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     rank: row.rank,
     teamId: row.teamId,
     teamName: row.teamName,
-    teamLogo: row.teamLogo || row.fallbackLogo || participantMap.get(row.teamId)?.teamLogo || '',
+    teamLogo: row.teamLogo || participantMap.get(row.teamId)?.teamLogo || '',
     prizeUsd: row.prizeUsd || 0,
     isChinaTeam: !!row.isChinaTeam,
     region: participantMap.get(row.teamId)?.region || '',
@@ -265,13 +263,11 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     .select({
       teamId: schema.rosters.teamId,
       teamName: schema.teams.name,
-      teamLogo: schema.participants.teamLogo,
-      fallbackLogo: schema.teams.logo,
+      teamLogo: schema.teams.logo,
       handle: schema.players.handle,
       playerId: schema.players.id,
       role: schema.rosters.role,
-      playerAvatar: schema.rosters.playerAvatar,
-      fallbackAvatar: schema.players.avatar,
+      avatar: schema.players.avatar,
       playerCountry: schema.rosters.playerCountry,
       fallbackCountry: schema.players.country,
     })
@@ -297,7 +293,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
         teamName: row.teamName,
         inviteType: participant?.inviteType || '',
         region: participant?.region || '',
-        teamLogo: row.teamLogo || row.fallbackLogo || participant?.teamLogo || '',
+        teamLogo: row.teamLogo || participant?.teamLogo || '',
         players: [],
       })
     }
@@ -307,7 +303,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       handle: row.handle,
       role: row.role || '',
       country: row.playerCountry || row.fallbackCountry || '',
-      avatar: row.playerAvatar || row.fallbackAvatar || '',
+      avatar: row.avatar || '',
     } satisfies RosterEntry)
   }
 

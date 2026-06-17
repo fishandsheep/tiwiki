@@ -67,6 +67,55 @@ body {
     color: rgb(var(--gold));
     text-shadow: 0 0 18px rgb(var(--red) / 0.18);
   }
+  .admin-panel {
+    @apply rounded-xl border border-edge bg-bg-card/95 p-3;
+    background-image:
+      linear-gradient(145deg, rgb(var(--gold) / 0.035), transparent 38%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.02), transparent 60%);
+  }
+  .admin-label {
+    @apply mb-1 block text-xs font-medium text-ink-muted;
+  }
+  .admin-input {
+    @apply w-full rounded-md border border-edge bg-bg-main px-3 py-2 text-sm text-ink-main outline-none transition-colors placeholder:text-ink-muted disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .admin-input:hover {
+    @apply border-gold/50;
+  }
+  .admin-input:focus {
+    @apply border-gold;
+  }
+  .admin-button {
+    @apply inline-flex min-h-10 items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .admin-button-primary {
+    @apply bg-gold text-bg-main hover:bg-gold/90;
+  }
+  .admin-button-ghost {
+    @apply border border-edge bg-transparent text-ink-main hover:border-gold/60;
+  }
+  .admin-button-danger {
+    @apply border border-red/60 bg-red/15 hover:bg-red/25;
+    color: rgb(var(--red-bright));
+  }
+  .admin-table-button {
+    @apply flex min-h-10 w-full items-center justify-between gap-3 rounded-md border border-transparent px-3 py-2 text-left text-sm text-ink-muted transition-colors hover:border-gold/50 hover:text-ink-main;
+  }
+  .admin-table-button-active {
+    @apply border-gold/60 bg-gold/10 text-gold;
+  }
+  .admin-grid-table {
+    @apply min-w-[900px] w-full border-collapse text-left text-sm;
+  }
+  .admin-grid-table th {
+    @apply border-b border-edge bg-bg-subtle/70 px-3 py-2 text-xs font-medium text-ink-muted;
+  }
+  .admin-grid-table td {
+    @apply max-w-[240px] truncate border-b border-edge/70 px-3 py-2 text-ink-main;
+  }
+  .admin-grid-table tbody tr {
+    @apply cursor-pointer transition-colors hover:bg-bg-subtle/60;
+  }
   .ti-hero {
     isolation: isolate;
     min-height: clamp(520px, 74vh, 760px);

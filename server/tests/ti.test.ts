@@ -17,6 +17,10 @@ test('TI6 detail has placements and rosters', async () => {
   assert.equal(detail?.tiNo, 6)
   assert.ok((detail?.placements.length || 0) >= 16)
   assert.ok((detail?.rosters.length || 0) >= 16)
+  assert.ok(detail?.participants.some((participant) => participant.teamLogo))
+  assert.ok(detail?.placements.some((placement) => placement.teamLogo))
+  assert.ok(detail?.rosters.some((team) => team.teamLogo))
+  assert.ok(detail?.rosters.some((team) => team.players.some((player) => player.avatar)))
 })
 
 test('rankings and stats return core aggregates', async () => {

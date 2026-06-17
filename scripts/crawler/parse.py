@@ -177,6 +177,7 @@ def upsert_player(
 ) -> str:
     player_id = slugify(handle)
     existing = players.get(player_id, {})
+    liquipedia_url = f"https://liquipedia.net/dota2/{handle.replace(' ', '_')}"
     players[player_id] = {
         "id": player_id,
         "handle": handle,
@@ -186,7 +187,8 @@ def upsert_player(
         "avatar": existing.get("avatar") or avatar,
         "avatar_source_url": existing.get("avatar_source_url") or avatar_source_url,
         "position": existing.get("position", ""),
-        "liquipedia_url": f"https://liquipedia.net/dota2/{handle.replace(' ', '_')}",
+        "homepage_url": existing.get("homepage_url") or liquipedia_url,
+        "liquipedia_url": liquipedia_url,
     }
     return player_id
 
@@ -232,8 +234,6 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                 "team_name": team_name,
                 "region": region,
                 "country": country,
-                "team_logo": team_logo,
-                "team_logo_source_url": "",
                 "invite_type": invite_type,
                 "placement": get_param(template, "placement"),
             }
@@ -252,8 +252,6 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                     "player_id": player_id,
                     "role": f"{idx} 号位",
                     "player_country": player_country,
-                    "player_avatar": player_avatar,
-                    "player_avatar_source_url": "",
                 }
             )
 
@@ -262,14 +260,14 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
             if not handle:
                 continue
             player_id = upsert_player(players, handle)
-            rosters.append({"team_id": team_id, "player_id": player_id, "role": "教练", "player_country": "", "player_avatar": "", "player_avatar_source_url": ""})
+            rosters.append({"team_id": team_id, "player_id": player_id, "role": "教练", "player_country": ""})
 
         for sub_key in ("s1", "s2", "sub1", "sub2"):
             handle = get_param(template, sub_key)
             if not handle:
                 continue
             player_id = upsert_player(players, handle)
-            rosters.append({"team_id": team_id, "player_id": player_id, "role": "替补", "player_country": "", "player_avatar": "", "player_avatar_source_url": ""})
+            rosters.append({"team_id": team_id, "player_id": player_id, "role": "替补", "player_country": ""})
 
     for template in code.filter_templates(recursive=True):
         if clean_template_name(template) != "teamparticipants":
@@ -307,8 +305,6 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                     "team_name": team_name,
                     "region": region,
                     "country": country,
-                    "team_logo": team_logo,
-                    "team_logo_source_url": "",
                     "invite_type": invite_type or "Invited",
                     "placement": "",
                 }
@@ -346,8 +342,6 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                         "player_id": player_id,
                         "role": role_label,
                         "player_country": player_country,
-                        "player_avatar": player_avatar,
-                        "player_avatar_source_url": "",
                     }
                 )
 
@@ -520,7 +514,6 @@ def image_src(node: Any) -> str:
 
 def enrich_participant_media_from_html(html: str, teams: dict[str, dict[str, Any]], participants: list[dict[str, Any]]) -> None:
     soup = BeautifulSoup(html, "html.parser")
-    participant_by_team = {row["team_id"]: row for row in participants}
     alias_to_team_id: dict[str, str] = {}
     for team_id, team in teams.items():
         for alias in team_aliases(team["name"], team_id, team.get("name_zh", "")):
@@ -536,9 +529,6 @@ def enrich_participant_media_from_html(html: str, teams: dict[str, dict[str, Any
         if not src:
             continue
         teams[team_id]["logo"] = teams[team_id].get("logo") or src
-        participant = participant_by_team.get(team_id)
-        if participant:
-            participant["team_logo"] = participant.get("team_logo") or src
 
 
 def parse_player_profile(html: str) -> dict[str, str]:

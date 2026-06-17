@@ -39,6 +39,7 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
       routes: ['/', '/ti', '/china', '/rankings'],
+      ignore: ['/admin'],
     },
   },
 })
