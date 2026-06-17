@@ -23,11 +23,12 @@
               <span v-else class="text-xs font-bold text-gold">{{ initials(p.teamName) }}</span>
             </div>
             <div class="min-w-0 flex-1">
-              <a
-                :href="`#roster-${p.teamId}`"
-                class="flex min-h-11 items-center truncate text-sm font-medium transition-colors hover:text-gold"
+              <button
+                type="button"
+                class="flex min-h-11 items-center truncate text-left text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card"
                 :class="p.isChinaTeam ? 'text-gold' : 'text-ink-main'"
-              >{{ p.teamName }}</a>
+                @click="emit('focus-team', p.teamId)"
+              >{{ p.teamName }}</button>
               <div class="mt-1 flex flex-wrap items-center gap-1.5">
                 <span class="text-xs text-ink-muted">{{ p.region || '赛区待补' }}</span>
                 <span v-if="p.inviteType" class="chip text-[10px]">{{ p.inviteType }}</span>
@@ -57,17 +58,18 @@
                 <span class="font-mono font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
               </td>
               <td class="px-4 py-3">
-                <a
-                  :href="`#roster-${p.teamId}`"
-                  class="inline-flex min-w-0 items-center gap-2 font-medium transition-colors hover:text-gold"
+                <button
+                  type="button"
+                  class="inline-flex min-h-11 min-w-0 items-center gap-2 text-left font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card"
                   :class="p.isChinaTeam ? 'text-gold' : 'text-ink-main'"
+                  @click="emit('focus-team', p.teamId)"
                 >
                   <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
                     <img v-if="p.teamLogo" :src="p.teamLogo" :alt="`${p.teamName} logo`" class="max-h-6 max-w-6 object-contain" loading="lazy">
                     <span v-else class="text-[10px] font-bold text-gold">{{ initials(p.teamName) }}</span>
                   </span>
                   <span class="truncate">{{ p.teamName }}</span>
-                </a>
+                </button>
               </td>
               <td class="px-4 py-3 text-ink-muted">{{ p.region || '—' }}</td>
               <td class="px-4 py-3">
@@ -90,6 +92,7 @@ import { formatUsd } from '~/composables/tiData'
 import type { Placement, TournamentStatus } from '~/types/ti'
 
 defineProps<{ placements: Placement[]; status?: TournamentStatus }>()
+const emit = defineEmits<{ 'focus-team': [teamId: string] }>()
 
 function rankColor(rank: number) {
   if (rank === 1) return 'text-gold'

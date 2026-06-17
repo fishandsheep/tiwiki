@@ -174,6 +174,15 @@
               :type="field.type === 'integer' ? 'number' : field.type === 'url' ? 'url' : 'text'"
               :disabled="isFieldReadonly(field)"
             >
+            <a
+              v-if="fieldLinkHref(field, form[field.name])"
+              :href="fieldLinkHref(field, form[field.name]) || undefined"
+              target="_blank"
+              rel="noreferrer"
+              class="mt-2 inline-flex min-h-10 items-center rounded-md border border-edge px-3 text-sm text-gold transition hover:border-gold/60 hover:bg-gold/10"
+            >
+              打开链接
+            </a>
           </label>
 
           <div v-if="formError" class="rounded-md border border-red/50 bg-red/10 px-3 py-2 text-sm text-[rgb(var(--red-bright))]">
@@ -348,6 +357,17 @@ function formatCell(value: unknown, field: AdminField) {
   if (field.type === 'boolean') return value ? '是' : '否'
   if (value == null || value === '') return '—'
   return String(value)
+}
+
+function fieldLinkHref(field: AdminField, value: unknown) {
+  if (field.type !== 'url' || typeof value !== 'string') return ''
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+  if (trimmed.startsWith('//')) return `https:${trimmed}`
+  if (trimmed.startsWith('/media/')) return trimmed
+  if (trimmed.startsWith('/')) return `https://liquipedia.net${trimmed}`
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return ''
 }
 
 function sortMark(fieldName: string) {

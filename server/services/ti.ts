@@ -119,6 +119,7 @@ function normalizeTournament(row: typeof schema.tournaments.$inferSelect): Tourn
     runnerUpTeamId: row.runnerUpTeamId || '',
     summaryZh: row.summaryZh || '',
     chinaSummary: row.chinaSummary || '',
+    liquipediaUrl: row.liquipediaUrl || '',
   }
 }
 
@@ -203,6 +204,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       teamId: schema.participants.teamId,
       teamName: schema.teams.name,
       teamLogo: schema.teams.logo,
+      teamLiquipediaUrl: schema.teams.liquipediaUrl,
       region: schema.participants.region,
       teamRegion: schema.teams.region,
       country: schema.participants.country,
@@ -218,6 +220,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     teamId: row.teamId,
     teamName: row.teamName,
     teamLogo: row.teamLogo || '',
+    teamLiquipediaUrl: row.teamLiquipediaUrl || '',
     region: translateRegion(row.region || row.teamRegion || ''),
     country: row.country || '',
     inviteType: translateInviteType(row.inviteType || '', row.region || row.teamRegion || ''),
@@ -232,6 +235,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       teamId: schema.placements.teamId,
       teamName: schema.teams.name,
       teamLogo: schema.teams.logo,
+      teamLiquipediaUrl: schema.teams.liquipediaUrl,
       prizeUsd: schema.placements.prizeUsd,
       isChinaTeam: schema.placements.isChinaTeam,
     })
@@ -253,6 +257,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     teamId: row.teamId,
     teamName: row.teamName,
     teamLogo: row.teamLogo || participantMap.get(row.teamId)?.teamLogo || '',
+    teamLiquipediaUrl: row.teamLiquipediaUrl || participantMap.get(row.teamId)?.teamLiquipediaUrl || '',
     prizeUsd: row.prizeUsd || 0,
     isChinaTeam: !!row.isChinaTeam,
     region: participantMap.get(row.teamId)?.region || '',
@@ -264,10 +269,12 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       teamId: schema.rosters.teamId,
       teamName: schema.teams.name,
       teamLogo: schema.teams.logo,
+      teamLiquipediaUrl: schema.teams.liquipediaUrl,
       handle: schema.players.handle,
       playerId: schema.players.id,
       role: schema.rosters.role,
       avatar: schema.players.avatar,
+      playerLiquipediaUrl: schema.players.liquipediaUrl,
       playerCountry: schema.rosters.playerCountry,
       fallbackCountry: schema.players.country,
     })
@@ -294,6 +301,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
         inviteType: participant?.inviteType || '',
         region: participant?.region || '',
         teamLogo: row.teamLogo || participant?.teamLogo || '',
+        teamLiquipediaUrl: row.teamLiquipediaUrl || participant?.teamLiquipediaUrl || '',
         players: [],
       })
     }
@@ -304,6 +312,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       role: row.role || '',
       country: row.playerCountry || row.fallbackCountry || '',
       avatar: row.avatar || '',
+      liquipediaUrl: row.playerLiquipediaUrl || '',
     } satisfies RosterEntry)
   }
 
@@ -325,6 +334,7 @@ export async function getRankings(): Promise<RankingsData> {
       tournamentId: schema.placements.tournamentId,
       rank: schema.placements.rank,
       teamName: schema.teams.name,
+      teamLiquipediaUrl: schema.teams.liquipediaUrl,
       isChinaTeam: schema.placements.isChinaTeam,
     })
     .from(schema.placements)
@@ -388,6 +398,7 @@ export async function getRankings(): Promise<RankingsData> {
           country: schema.players.country,
           region: schema.players.region,
           avatar: schema.players.avatar,
+          liquipediaUrl: schema.players.liquipediaUrl,
         })
         .from(schema.rosters)
         .innerJoin(schema.players, eq(schema.rosters.playerId, schema.players.id))
@@ -412,15 +423,19 @@ export async function getRankings(): Promise<RankingsData> {
       country: row.country || '',
       region: row.region || '',
       avatar: row.avatar || '',
+      liquipediaUrl: row.liquipediaUrl || '',
       championshipCount: 0,
       championshipTiNos: [],
       championshipYears: [],
+      championships: [],
     }
     if (!current.championshipTiNos.includes(tiNo)) {
       current.championshipTiNos.push(tiNo)
       current.championshipTiNos.sort((a, b) => a - b)
       current.championshipYears.push(tournament.year)
       current.championshipYears.sort((a, b) => a - b)
+      current.championships.push({ tiNo, year: tournament.year, routeId: tournament.routeId })
+      current.championships.sort((a, b) => a.tiNo - b.tiNo)
       current.championshipCount += 1
     }
     playerChampionMap.set(row.playerId, current)
@@ -483,6 +498,7 @@ export async function getChinaPerformance(tournamentId: string): Promise<ChinaPe
       rank: p.rank,
       placement: placementLabel(p.rank),
       prizeUsd: p.prizeUsd,
+      teamLiquipediaUrl: p.teamLiquipediaUrl || '',
     })),
   }
 }

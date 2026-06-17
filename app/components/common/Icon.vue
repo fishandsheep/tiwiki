@@ -35,6 +35,9 @@ const PATHS: Record<string, string> = {
   dollar: '<path d="M12 2v20"/><path d="M17 6.5C17 4.6 14.8 3 12 3S7 4.6 7 6.5 9.2 10 12 10s5 1.6 5 3.5S14.8 17 12 17s-5-1.6-5-3.5"/>',
   // star (highlight)
   star: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.6l1.2-6L3.3 9.3l6.1-.7L12 3Z"/>',
+  // external link
+  external:
+    '<path d="M14 5h5v5"/><path d="M10 14 19 5"/><path d="M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/>',
 }
 
 const props = withDefaults(

@@ -5,11 +5,11 @@
       <p class="text-xs text-ink-muted lg:text-sm">已统计 {{ players.length }} 位 Ti冠军选手</p>
     </div>
 
-    <div class="grid gap-px bg-edge sm:grid-cols-2">
+    <div class="grid gap-px bg-edge md:grid-cols-2 xl:grid-cols-3">
       <article
         v-for="(player, i) in players"
         :key="player.playerId"
-        class="flex gap-3 bg-bg-card px-4 py-4 lg:px-5"
+        class="flex items-start gap-3 bg-bg-card px-4 py-4 lg:px-5"
       >
         <div class="flex w-12 shrink-0 flex-col items-center gap-2">
           <span class="text-xs font-mono text-ink-muted">#{{ i + 1 }}</span>
@@ -24,7 +24,7 @@
 
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <h4 class="min-w-0 max-w-full truncate text-base font-bold text-ink-main lg:text-lg">{{ player.handle }}</h4>
+            <h4 class="min-w-0 max-w-full break-words text-base font-bold leading-snug text-ink-main lg:text-lg">{{ player.handle }}</h4>
             <span class="chip chip-gold">{{ player.championshipCount }} 冠</span>
             <span class="chip">{{ nationality(player) }}</span>
           </div>
@@ -42,13 +42,27 @@
 
           <p class="mt-2 text-xs text-ink-muted lg:text-sm">对应届次</p>
           <div class="mt-1 flex flex-wrap gap-1.5">
-            <span
-              v-for="tiNo in player.championshipTiNos"
-              :key="tiNo"
-              class="ti-wordmark text-xs"
+            <NuxtLink
+              v-for="championship in player.championships"
+              :key="`${player.playerId}-${championship.routeId}`"
+              :to="`/ti/${championship.routeId}`"
+              class="ti-wordmark text-xs transition-opacity hover:opacity-80"
             >
-              {{ formatTiLabel(tiNo) }}
-            </span>
+              {{ formatTiLabel(championship.tiNo) }}
+            </NuxtLink>
+          </div>
+
+          <div v-if="player.liquipediaUrl" class="mt-3">
+            <a
+              :href="player.liquipediaUrl"
+              target="_blank"
+              rel="noreferrer"
+              class="wiki-link wiki-link-compact"
+              aria-label="打开选手 Liquipedia 页面"
+            >
+              <span class="wiki-link-icon"><Icon name="external" :size="10" /></span>
+              <span>Liquipedia</span>
+            </a>
           </div>
         </div>
       </article>

@@ -380,6 +380,37 @@ function curlForAvatar(url: string) {
   }
 }
 
+function commandExists(command: string) {
+  const result = spawnSync(command, ['-version'], { encoding: 'utf8' })
+  return result.status === 0
+}
+
+function processAvatarWithConvert(inputPath: string, outputPath: string) {
+  return spawnSync('convert', [
+    inputPath,
+    '-auto-orient',
+    '-thumbnail',
+    '160x160>',
+    '-strip',
+    outputPath,
+  ], { encoding: 'utf8' })
+}
+
+function processAvatarWithFfmpeg(inputPath: string, outputPath: string) {
+  return spawnSync('ffmpeg', [
+    '-y',
+    '-i',
+    inputPath,
+    '-frames:v',
+    '1',
+    '-update',
+    '1',
+    '-vf',
+    'scale=if(gt(iw\\,160)\\,160\\,iw):if(gt(ih\\,160)\\,160\\,ih):force_original_aspect_ratio=decrease,format=yuvj420p',
+    outputPath,
+  ], { encoding: 'utf8' })
+}
+
 async function resolveLiquipediaImageUrl(source: string) {
   const fileName = liquipediaFileNameFrom(source)
   if (!fileName) return normalizeRemoteUrl(source)
@@ -463,29 +494,47 @@ async function preparePlayerAvatar(playerId: string | number, sourceUrl: unknown
   const tempInput = resolve(tmpdir(), `${slug}-${Date.now()}${media.ext}`)
   const tempOutput = resolve(tmpdir(), `${slug}-${Date.now()}-160.jpg`)
   const finalPath = resolve(mediaDir, `${slug}.jpg`)
+  const passthroughPath = resolve(mediaDir, `${slug}${media.ext}`)
   writeFileSync(tempInput, media.bytes)
   try {
-    const result = spawnSync('convert', [
-      tempInput,
-      '-auto-orient',
-      '-thumbnail',
-      '160x160>',
-      '-strip',
-      tempOutput,
-    ], { encoding: 'utf8' })
-    if (result.status !== 0) {
-      throw new AdminValidationError(`头像图片处理失败：${result.stderr || 'ImageMagick convert 执行失败'}`)
+    if (commandExists('convert')) {
+      const result = processAvatarWithConvert(tempInput, tempOutput)
+      if (result.status !== 0) {
+        throw new AdminValidationError(`头像图片处理失败：${result.stderr || 'ImageMagick convert 执行失败'}`)
+      }
+      rmSync(finalPath, { force: true })
+      rmSync(passthroughPath, { force: true })
+      writeFileSync(finalPath, readFileSync(tempOutput))
+      return {
+        avatar: `/media/liquipedia/players/${slug}.jpg`,
+        avatar_source_url: media.normalizedSource,
+      }
     }
+
+    if (commandExists('ffmpeg')) {
+      const result = processAvatarWithFfmpeg(tempInput, tempOutput)
+      if (result.status !== 0) {
+        throw new AdminValidationError(`头像图片处理失败：${result.stderr || 'ffmpeg 执行失败'}`)
+      }
+      rmSync(finalPath, { force: true })
+      rmSync(passthroughPath, { force: true })
+      writeFileSync(finalPath, readFileSync(tempOutput))
+      return {
+        avatar: `/media/liquipedia/players/${slug}.jpg`,
+        avatar_source_url: media.normalizedSource,
+      }
+    }
+
     rmSync(finalPath, { force: true })
-    writeFileSync(finalPath, readFileSync(tempOutput))
+    rmSync(passthroughPath, { force: true })
+    writeFileSync(passthroughPath, media.bytes)
+    return {
+      avatar: `/media/liquipedia/players/${slug}${media.ext}`,
+      avatar_source_url: media.normalizedSource,
+    }
   } finally {
     rmSync(tempInput, { force: true })
     rmSync(tempOutput, { force: true })
-  }
-
-  return {
-    avatar: `/media/liquipedia/players/${slug}.jpg`,
-    avatar_source_url: media.normalizedSource,
   }
 }
 

@@ -27,6 +27,12 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 body {
   margin: 0;
   font-family: theme('fontFamily.sans');
@@ -58,6 +64,29 @@ body {
   .chip-red {
     @apply border-red/40 bg-red/10;
     color: rgb(var(--red-bright));
+  }
+  .wiki-link {
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card;
+    border-color: rgb(var(--gold) / 0.22);
+    background:
+      linear-gradient(180deg, rgb(var(--gold) / 0.1), rgb(var(--gold) / 0.04)),
+      rgb(var(--bg-subtle) / 0.72);
+    color: rgb(var(--text-main));
+  }
+  .wiki-link:hover {
+    border-color: rgb(var(--gold) / 0.46);
+    background:
+      linear-gradient(180deg, rgb(var(--gold) / 0.16), rgb(var(--gold) / 0.06)),
+      rgb(var(--bg-subtle) / 0.9);
+    color: rgb(var(--gold));
+  }
+  .wiki-link-compact {
+    @apply min-h-11 px-3 py-1 text-xs sm:min-h-0 sm:px-2.5 sm:py-0.5 sm:text-[11px];
+  }
+  .wiki-link-icon {
+    @apply inline-flex h-4 w-4 items-center justify-center rounded-full;
+    background: rgb(var(--gold) / 0.12);
+    color: rgb(var(--gold));
   }
   .ti-wordmark {
     font-family: "Cormorant Garamond", "Times New Roman", serif;
@@ -118,7 +147,7 @@ body {
   }
   .ti-hero {
     isolation: isolate;
-    min-height: clamp(520px, 74vh, 760px);
+    min-height: clamp(360px, 50vh, 520px);
     background: rgb(var(--bg-main));
     cursor: crosshair;
   }
@@ -196,6 +225,13 @@ body {
   }
   .ti-hero::after {
     opacity: 0.38;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiki-link,
+  .wiki-link:hover {
+    transition: none;
   }
 }
 

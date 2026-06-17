@@ -20,6 +20,7 @@ export interface Tournament {
   runnerUpTeamId: string
   summaryZh: string
   chinaSummary: string
+  liquipediaUrl?: string
 }
 
 export interface Team {
@@ -31,6 +32,7 @@ export interface Team {
   logo: string
   logoSourceUrl?: string
   descriptionZh: string
+  liquipediaUrl?: string
 }
 
 export interface Placement {
@@ -43,6 +45,7 @@ export interface Placement {
   region?: string
   inviteType?: string
   teamLogo?: string
+  teamLiquipediaUrl?: string
 }
 
 export interface Participant {
@@ -61,6 +64,7 @@ export interface RosterEntry {
   role: string
   country: string
   avatar: string
+  liquipediaUrl?: string
 }
 
 export interface TeamRoster {
@@ -69,6 +73,7 @@ export interface TeamRoster {
   inviteType: string
   region: string
   teamLogo: string
+  teamLiquipediaUrl?: string
   players: RosterEntry[]
 }
 
@@ -84,6 +89,7 @@ export interface ChinaTeamResult {
   rank: number
   placement: string
   prizeUsd: number
+  teamLiquipediaUrl?: string
 }
 
 export interface ChinaPerformance {
@@ -115,9 +121,15 @@ export interface PlayerChampionRow {
   country: string
   region: string
   avatar: string
+  liquipediaUrl?: string
   championshipCount: number
   championshipTiNos: number[]
   championshipYears: number[]
+  championships: Array<{
+    tiNo: number
+    year: number
+    routeId: string
+  }>
 }
 
 export interface PrizePoolRow {

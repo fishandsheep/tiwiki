@@ -39,7 +39,7 @@ export default <Partial<Config>>{
         ],
       },
       maxWidth: {
-        shell: '1200px',
+        shell: '1120px',
       },
     },
   },
