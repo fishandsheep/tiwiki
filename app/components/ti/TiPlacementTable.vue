@@ -1,6 +1,6 @@
 <template>
   <div class="card overflow-hidden">
-    <div class="border-b border-edge px-4 py-3 lg:px-5 lg:py-4">
+    <div class="border-b border-edge px-3.5 py-2.5 lg:px-5 lg:py-4">
       <h3 class="text-base font-bold text-ink-main lg:text-lg">最终排名</h3>
       <p class="text-xs text-ink-muted lg:text-sm">共 {{ placements.length }} 支队伍</p>
     </div>
@@ -14,27 +14,27 @@
         <article
           v-for="p in placements"
           :key="p.teamId + p.rank"
-          class="px-4 py-3"
+          class="px-3.5 py-2.5"
         >
-          <div class="flex min-w-0 items-start gap-3">
-            <span class="w-8 shrink-0 font-mono text-sm font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
-            <div class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
+          <div class="flex min-w-0 items-start gap-2.5">
+            <span class="w-7 shrink-0 pt-1 text-center font-mono text-sm font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
+            <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
               <img v-if="p.teamLogo" :src="p.teamLogo" :alt="`${p.teamName} logo`" class="max-h-7 max-w-7 object-contain" loading="lazy">
               <span v-else class="text-xs font-bold text-gold">{{ initials(p.teamName) }}</span>
             </div>
             <div class="min-w-0 flex-1">
               <button
                 type="button"
-                class="flex min-h-11 items-center truncate text-left text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card"
+                class="flex min-w-0 items-center text-left text-sm font-medium leading-5 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card"
                 :class="p.isChinaTeam ? 'text-gold' : 'text-ink-main'"
                 @click="emit('focus-team', p.teamId)"
-              >{{ p.teamName }}</button>
-              <div class="mt-1 flex flex-wrap items-center gap-1.5">
+              ><span class="truncate">{{ p.teamName }}</span></button>
+              <div class="mt-0.5 flex flex-wrap items-center gap-1">
                 <span class="text-xs text-ink-muted">{{ p.region || '赛区待补' }}</span>
                 <span v-if="p.inviteType" class="chip text-[10px]">{{ p.inviteType }}</span>
               </div>
             </div>
-            <span class="shrink-0 pt-0.5 text-right font-mono text-xs text-ink-muted">
+            <span class="shrink-0 pt-1 text-right font-mono text-[11px] leading-5 text-ink-muted">
               {{ p.prizeUsd ? formatUsd(p.prizeUsd) : '—' }}
             </span>
           </div>

@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-auto max-w-shell px-4 py-8">
-    <header v-reveal class="reveal mb-6">
+  <div class="mx-auto max-w-shell px-3 py-5 sm:px-4 sm:py-8">
+    <header v-reveal class="reveal mb-5 sm:mb-6">
       <span class="chip chip-red">🇨🇳 中国战队专题</span>
       <h1 class="mt-3 text-2xl font-black text-ink-main sm:text-3xl">中国战队的 Ti征程</h1>
       <p class="mt-1 max-w-2xl text-sm text-ink-muted">
@@ -9,16 +9,16 @@
     </header>
 
     <!-- 中国冠军高光 -->
-    <section v-if="champions.length" class="mb-8">
+    <section v-if="champions.length" class="mb-6 sm:mb-8">
       <SectionTitle title="中国冠军" />
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
         <NuxtLink
           v-for="(c, i) in champions"
           :key="c.tiNo"
           v-reveal
           :style="{ '--i': i }"
           :to="`/ti/${c.routeId}`"
-          class="card card-hover reveal border-gold/40 bg-gold/5 p-5"
+          class="card card-hover reveal border-gold/40 bg-gold/5 p-4 sm:p-5"
         >
           <span class="ti-wordmark text-3xl">{{ formatTiLabel(c.tiNo) }}</span>
           <p class="mt-2 text-xs text-ink-muted">{{ c.year }}</p>
@@ -36,7 +36,7 @@
           v-for="c in orderedByTi"
           :key="c.tiNo"
           :to="`/ti/${c.routeId}`"
-          class="grid min-w-0 grid-cols-[3.75rem_1fr] gap-x-3 gap-y-1 px-4 py-3 transition-colors hover:bg-bg-subtle sm:flex sm:items-center sm:gap-4"
+          class="grid min-w-0 grid-cols-[3.25rem_1fr] gap-x-2.5 gap-y-1 px-3.5 py-2.5 transition-colors hover:bg-bg-subtle sm:flex sm:items-center sm:gap-4 sm:px-4 sm:py-3"
         >
           <span class="font-black sm:w-16" :class="c.bestRank === 1 ? 'text-gold' : 'text-ink-main'">{{ formatTiLabel(c.tiNo) }}</span>
           <span class="min-w-0 truncate text-sm font-medium text-ink-main sm:flex-1">{{ c.bestTeamName }}</span>

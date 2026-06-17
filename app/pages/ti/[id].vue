@@ -2,26 +2,16 @@
   <div>
     <TiHero :t="detail!" />
 
-    <div class="mx-auto max-w-shell px-3 py-5 sm:px-4 sm:py-6 lg:py-8">
-      <div class="grid min-w-0 gap-5 lg:grid-cols-3 lg:gap-6">
+    <div class="mx-auto max-w-shell px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
+      <div class="grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         <!-- 主内容 -->
-        <div class="order-2 min-w-0 space-y-5 lg:order-none lg:col-span-2">
+        <div class="order-2 min-w-0 space-y-4 sm:space-y-5 lg:order-none lg:col-span-2">
           <!-- 赛事简介 -->
-          <section v-reveal class="reveal card p-4 sm:p-5 lg:p-6">
+          <section v-reveal class="reveal card p-3.5 sm:p-5 lg:p-6">
             <div class="mb-2 flex flex-wrap items-center gap-2">
               <h2 class="text-base font-bold text-ink-main lg:text-lg">赛事简介</h2>
-              <a
-                v-if="detail?.liquipediaUrl"
-                :href="detail.liquipediaUrl"
-                target="_blank"
-                rel="noreferrer"
-                class="wiki-link"
-              >
-                <span class="wiki-link-icon"><Icon name="external" :size="11" /></span>
-                <span>Liquipedia</span>
-              </a>
             </div>
-            <p class="max-w-prose text-sm leading-relaxed text-ink-muted lg:text-base lg:leading-8">{{ detail?.summaryZh }}</p>
+            <p class="max-w-prose text-sm leading-6 text-ink-muted lg:text-base lg:leading-8">{{ detail?.summaryZh }}</p>
           </section>
 
           <!-- 中国战队表现 -->

@@ -1,11 +1,11 @@
 <template>
-  <div class="mx-auto max-w-shell px-4 py-8">
-    <header v-reveal class="reveal mb-6">
+  <div class="mx-auto max-w-shell px-3 py-5 sm:px-4 sm:py-8">
+    <header v-reveal class="reveal mb-5 sm:mb-6">
       <h1 class="text-2xl font-black text-ink-main sm:text-3xl">榜单</h1>
       <p class="mt-1 text-sm text-ink-muted">奖金池与 Ti冠军选手总览</p>
     </header>
 
-    <div class="space-y-8">
+    <div class="space-y-6 sm:space-y-8">
       <!-- 奖金池榜 -->
       <section v-reveal class="reveal">
         <SectionTitle title="奖金池榜" />

@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-4 flex items-baseline justify-between">
+  <div class="mb-3 flex items-baseline justify-between lg:mb-4">
     <h2 class="text-lg font-bold text-ink-main sm:text-xl">{{ title }}</h2>
     <NuxtLink v-if="to" :to="to" class="inline-flex min-h-11 items-center text-xs text-ink-muted transition-colors hover:text-gold">
       查看全部 →
