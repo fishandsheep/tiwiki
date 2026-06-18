@@ -17,7 +17,14 @@
             class="champion-avatar grid h-10 w-10 place-items-center rounded-full border border-gold/25 text-sm font-bold text-gold lg:h-11 lg:w-11"
             :style="{ background: avatarBg(player.handle) }"
           >
-            <img v-if="player.avatar" :src="player.avatar" :alt="player.handle" class="champion-avatar-img" loading="lazy">
+            <img
+              v-if="player.avatar"
+              v-media-zoom="{ src: player.avatar, alt: player.handle, caption: player.handle, subcaption: nationality(player), kind: 'avatar' }"
+              :src="player.avatar"
+              :alt="player.handle"
+              class="champion-avatar-img"
+              loading="lazy"
+            >
             <span v-else>{{ initials(player.handle) }}</span>
           </div>
         </div>

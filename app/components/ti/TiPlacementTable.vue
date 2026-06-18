@@ -19,7 +19,14 @@
           <div class="flex min-w-0 items-start gap-2.5">
             <span class="w-7 shrink-0 pt-1 text-center font-mono text-sm font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
             <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
-              <img v-if="p.teamLogo" :src="p.teamLogo" :alt="`${p.teamName} logo`" class="max-h-7 max-w-7 object-contain" loading="lazy">
+              <img
+                v-if="p.teamLogo"
+                v-media-zoom="{ src: p.teamLogo, alt: `${p.teamName} logo`, caption: p.teamName, subcaption: p.region, kind: 'logo' }"
+                :src="p.teamLogo"
+                :alt="`${p.teamName} logo`"
+                class="max-h-7 max-w-7 object-contain"
+                loading="lazy"
+              >
               <span v-else class="text-xs font-bold text-gold">{{ initials(p.teamName) }}</span>
             </div>
             <div class="min-w-0 flex-1">
@@ -65,7 +72,14 @@
                   @click="emit('focus-team', p.teamId)"
                 >
                   <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
-                    <img v-if="p.teamLogo" :src="p.teamLogo" :alt="`${p.teamName} logo`" class="max-h-6 max-w-6 object-contain" loading="lazy">
+                    <img
+                      v-if="p.teamLogo"
+                      v-media-zoom="{ src: p.teamLogo, alt: `${p.teamName} logo`, caption: p.teamName, subcaption: p.region, kind: 'logo', toggleOnClick: false }"
+                      :src="p.teamLogo"
+                      :alt="`${p.teamName} logo`"
+                      class="max-h-6 max-w-6 object-contain"
+                      loading="lazy"
+                    >
                     <span v-else class="text-[10px] font-bold text-gold">{{ initials(p.teamName) }}</span>
                   </span>
                   <span class="truncate">{{ p.teamName }}</span>

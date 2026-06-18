@@ -17,7 +17,14 @@
       >
         <div class="flex flex-wrap items-center gap-2 pr-7 lg:pr-8">
           <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle lg:h-9 lg:w-9">
-            <img v-if="team.teamLogo" :src="team.teamLogo" :alt="`${team.teamName} logo`" class="max-h-7 max-w-7 object-contain" loading="lazy">
+            <img
+              v-if="team.teamLogo"
+              v-media-zoom="{ src: team.teamLogo, alt: `${team.teamName} logo`, caption: team.teamName, subcaption: team.region, kind: 'logo' }"
+              :src="team.teamLogo"
+              :alt="`${team.teamName} logo`"
+              class="max-h-7 max-w-7 object-contain"
+              loading="lazy"
+            >
             <span v-else class="text-xs font-bold text-gold">{{ initials(team.teamName) }}</span>
           </div>
           <h4 class="min-w-0 break-words text-sm font-bold leading-5 text-ink-main lg:text-base">{{ team.teamName }}</h4>
@@ -42,7 +49,14 @@
             class="relative flex min-h-[84px] items-center gap-2 rounded-lg border border-edge bg-bg-subtle px-2.5 py-2.5 lg:min-h-[92px] lg:gap-2.5 lg:px-3 lg:py-3"
           >
             <div class="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-gold/20 bg-bg-card lg:h-10 lg:w-10">
-              <img v-if="player.avatar" :src="player.avatar" :alt="player.handle" class="h-full w-full object-cover" loading="lazy">
+              <img
+                v-if="player.avatar"
+                v-media-zoom="{ src: player.avatar, alt: player.handle, caption: player.handle, subcaption: [player.role || '选手', player.country].filter(Boolean).join(' · '), kind: 'avatar' }"
+                :src="player.avatar"
+                :alt="player.handle"
+                class="h-full w-full object-cover"
+                loading="lazy"
+              >
               <span v-else class="text-xs font-bold text-gold">{{ initials(player.handle) }}</span>
             </div>
             <div class="min-w-0 flex-1 py-0.5">

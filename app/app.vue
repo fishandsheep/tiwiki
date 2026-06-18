@@ -7,6 +7,7 @@
     </main>
     <AppFooter v-if="!isAdminRoute" />
     <MobileBottomNav v-if="!isAdminRoute" />
+    <MediaZoomOverlay v-if="!isAdminRoute" />
   </div>
 </template>
 
