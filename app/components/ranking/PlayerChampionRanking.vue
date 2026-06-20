@@ -1,13 +1,47 @@
 <template>
   <div class="card overflow-hidden">
     <div class="border-b border-edge px-3.5 py-2.5 lg:px-5 lg:py-4">
-      <h3 class="text-base font-bold text-ink-main lg:text-lg">冠军数量排行</h3>
-      <p class="text-xs text-ink-muted lg:text-sm">已统计 {{ players.length }} 位 Ti冠军选手</p>
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h3 class="text-base font-bold text-ink-main lg:text-lg">冠军数量排行</h3>
+          <p class="text-xs text-ink-muted lg:text-sm">
+            <template v-if="q">匹配 {{ filteredPlayers.length }} / {{ players.length }} 位 Ti冠军选手</template>
+            <template v-else>已统计 {{ players.length }} 位 Ti冠军选手</template>
+          </p>
+        </div>
+
+        <label class="relative block lg:w-[18rem]">
+          <span class="sr-only">搜索冠军选手</span>
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted">
+            <Icon name="search" :size="15" />
+          </span>
+          <input
+            ref="inputEl"
+            v-model="q"
+            type="search"
+            inputmode="search"
+            enterkeyhint="search"
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="40"
+            placeholder="搜索选手 / 国家 / 年份 / Ti"
+            class="min-h-11 w-full rounded-lg border border-edge bg-bg-card py-2.5 pl-9 pr-16 text-sm text-ink-main placeholder:text-ink-muted/70 transition-colors focus:border-gold/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40"
+            @keydown.esc.prevent="clear"
+          >
+          <button
+            v-if="q"
+            type="button"
+            class="absolute right-2 top-1/2 inline-flex min-h-10 -translate-y-1/2 items-center rounded px-3 py-1 text-xs text-ink-muted transition-colors hover:text-gold"
+            aria-label="清空搜索"
+            @click="clear"
+          >清空</button>
+        </label>
+      </div>
     </div>
 
-    <div class="grid gap-px bg-edge md:grid-cols-2 xl:grid-cols-3">
+    <div v-if="filteredPlayers.length" class="grid gap-px bg-edge md:grid-cols-2 xl:grid-cols-3">
       <article
-        v-for="(player, i) in players"
+        v-for="(player, i) in filteredPlayers"
         :key="player.playerId"
         class="relative flex items-start gap-2.5 bg-bg-card px-3.5 py-3.5 sm:min-h-[204px] lg:gap-3 lg:px-5 lg:py-4 xl:min-h-[220px]"
       >
@@ -38,13 +72,14 @@
 
           <p class="mt-1.5 text-xs text-ink-muted lg:mt-2 lg:text-sm">夺冠年份</p>
           <div class="mt-1 flex flex-wrap gap-1">
-            <span
-              v-for="year in player.championshipYears"
-              :key="year"
-              class="rounded-md border border-edge bg-bg-subtle px-2 py-1 text-xs text-ink-main"
+            <NuxtLink
+              v-for="championship in player.championships"
+              :key="`${player.playerId}-year-${championship.routeId}`"
+              :to="`/ti/${championship.routeId}`"
+              class="championship-link group"
             >
-              {{ year }}
-            </span>
+              <span>{{ championship.year }}</span>
+            </NuxtLink>
           </div>
 
           <p class="mt-1.5 text-xs text-ink-muted lg:mt-2 lg:text-sm">对应届次</p>
@@ -53,9 +88,11 @@
               v-for="championship in player.championships"
               :key="`${player.playerId}-${championship.routeId}`"
               :to="`/ti/${championship.routeId}`"
-              class="ti-wordmark text-[11px] transition-opacity hover:opacity-80 lg:text-xs"
+              class="championship-link border-gold/30 bg-gold/10 text-gold hover:border-gold/60 hover:bg-gold/15"
             >
-              {{ formatTiLabel(championship.tiNo) }}
+              <span class="ti-wordmark text-[11px] transition-opacity group-hover:opacity-90 lg:text-xs">
+                {{ formatTiLabel(championship.tiNo) }}
+              </span>
             </NuxtLink>
           </div>
         </div>
@@ -71,6 +108,15 @@
         </a>
       </article>
     </div>
+
+    <div v-else class="px-3.5 py-8 text-center lg:px-5">
+      <p class="text-sm text-ink-muted">未找到匹配「{{ q }}」的冠军选手。</p>
+      <button
+        type="button"
+        class="mt-3 rounded-lg border border-edge px-3 py-1.5 text-sm text-ink-main transition-colors hover:border-gold/60"
+        @click="clear"
+      >清空搜索</button>
+    </div>
   </div>
 </template>
 
@@ -78,7 +124,32 @@
 import { formatTiLabel } from '~/composables/tiData'
 import type { PlayerChampionRow } from '~/types/ti'
 
-defineProps<{ players: PlayerChampionRow[] }>()
+const props = defineProps<{ players: PlayerChampionRow[] }>()
+const q = ref('')
+const inputEl = ref<HTMLInputElement | null>(null)
+
+const searchableText = computed(() => {
+  return new Map(
+    props.players.map((player) => [
+      player.playerId,
+      [
+        player.handle,
+        player.country,
+        player.region,
+        ...player.championshipYears.map(String),
+        ...player.championships.flatMap((championship) => [formatTiLabel(championship.tiNo), `ti${championship.tiNo}`]),
+      ]
+        .join(' ')
+        .toLowerCase(),
+    ]),
+  )
+})
+
+const filteredPlayers = computed(() => {
+  const needle = q.value.trim().toLowerCase()
+  if (!needle) return props.players
+  return props.players.filter((player) => searchableText.value.get(player.playerId)?.includes(needle))
+})
 
 function initials(handle: string) {
   const cleaned = handle.replace(/[^a-z0-9]/gi, '')
@@ -100,6 +171,11 @@ function avatarBg(seed: string) {
 function nationality(player: PlayerChampionRow) {
   return player.country || player.region || '国籍待补'
 }
+
+function clear() {
+  q.value = ''
+  inputEl.value?.focus()
+}
 </script>
 
 <style scoped>
@@ -112,7 +188,37 @@ function nationality(player: PlayerChampionRow) {
   height: 100%;
   object-fit: cover;
   object-position: 50% 18%;
-  transform: scale(1.28);
-  transform-origin: 50% 20%;
 }
+
+.championship-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgb(var(--border) / 0.9);
+  border-radius: 0.5rem;
+  background: rgb(var(--bg-subtle) / 0.92);
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: rgb(var(--text-main));
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.championship-link:hover {
+  border-color: rgb(var(--gold) / 0.5);
+  background: rgb(var(--gold) / 0.08);
+  color: rgb(var(--gold));
+  transform: translateY(-1px);
+}
+
+.championship-link:focus-visible {
+  outline: 1px solid rgb(var(--gold) / 0.72);
+  outline-offset: 2px;
+}
+
 </style>

@@ -6,15 +6,15 @@
     </header>
 
     <div class="space-y-6 sm:space-y-8">
+      <section class="scroll-mt-4">
+        <SectionTitle title="选手冠军榜" />
+        <PlayerChampionRanking :players="rankings.playerChampions" />
+      </section>
+
       <!-- 奖金池榜 -->
       <section v-reveal class="reveal">
         <SectionTitle title="奖金池榜" />
         <PrizePoolRanking :prize-pools="rankings.prizePools" />
-      </section>
-
-      <section class="scroll-mt-4">
-        <SectionTitle title="选手冠军榜" />
-        <PlayerChampionRanking :players="rankings.playerChampions" />
       </section>
     </div>
   </div>

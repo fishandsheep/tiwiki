@@ -38,6 +38,9 @@ const PATHS: Record<string, string> = {
   // external link
   external:
     '<path d="M14 5h5v5"/><path d="M10 14 19 5"/><path d="M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/>',
+  // search
+  search:
+    '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
 }
 
 const props = withDefaults(
