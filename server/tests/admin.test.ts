@@ -1,8 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import Database from 'better-sqlite3'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import { AdminConflictError, AdminValidationError, createAdminService } from '../services/admin'
+import { readFileSync } from 'node:fs'
 
 function createTestDb() {
   const db = new Database(':memory:')
@@ -159,6 +164,56 @@ test('admin service reports avatar source network failures as validation errors'
     )
   } finally {
     globalThis.fetch = originalFetch
+    db.close()
+  }
+})
+
+test('admin service keeps original avatar format for local file sources', async () => {
+  const db = createTestDb()
+  const admin = createAdminService(db)
+  const tempDir = mkdtempSync(join(tmpdir(), 'tiwiki-avatar-test-'))
+  const originalCwd = process.cwd()
+  const playerId = 'avatar-test-fixture'
+  const pngPath = join(tempDir, 'avatar.png')
+  const pngBytes = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+kZ1cAAAAASUVORK5CYII=',
+    'base64',
+  )
+  writeFileSync(pngPath, pngBytes)
+  db.prepare('insert into players (id, handle, country) values (?, ?, ?)').run(playerId, 'Avatar Fixture', 'CN')
+  process.chdir(resolve(originalCwd))
+
+  try {
+    const updated = await admin.updateRow('players', playerId, { avatar_source_url: pathToFileURL(pngPath).toString() })
+    assert.equal(updated?.avatar_source_url, pathToFileURL(pngPath).toString())
+    assert.match(String(updated?.avatar), /^\/media\/liquipedia\/players\/avatar-test-fixture\.(png|apng)$/)
+  } finally {
+    process.chdir(originalCwd)
+    rmSync(tempDir, { recursive: true, force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.png'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.apng'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.jpg'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.jpeg'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.webp'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.gif'), { force: true })
+    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.svg'), { force: true })
+    db.close()
+  }
+})
+
+test('admin service writes jpeg avatars with high-quality encoding', async () => {
+  const db = createTestDb()
+  const admin = createAdminService(db)
+  const source = 'https://liquipedia.net/commons/images/8/8c/Shadow_ESL_One_Manila_2016.jpg'
+  const originalCwd = process.cwd()
+  const outputPath = resolve(originalCwd, 'public/media/liquipedia/players/shadow.jpg')
+
+  try {
+    const updated = await admin.updateRow('players', 'shadow', { avatar_source_url: source })
+    assert.equal(updated?.avatar, '/media/liquipedia/players/shadow.jpg')
+    const info = readFileSync(outputPath)
+    assert.ok(info.length > 0)
+  } finally {
     db.close()
   }
 })

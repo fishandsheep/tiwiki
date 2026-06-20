@@ -168,10 +168,10 @@ onBeforeUnmount(() => {
 }
 
 .mz-avatar .mz-img {
-  /* Avatar sources are 160×160 — show at native size so the preview stays
+  /* Avatar sources are now prepared to max 200px — keep preview capped there so
      crisp instead of upscaling. */
-  width: clamp(120px, 42vw, 160px);
-  height: clamp(120px, 42vw, 160px);
+  width: clamp(120px, 42vw, 200px);
+  height: clamp(120px, 42vw, 200px);
   object-fit: cover;
   object-position: 50% 18%;
 }

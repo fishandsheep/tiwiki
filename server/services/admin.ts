@@ -74,6 +74,10 @@ export class AdminConflictError extends Error {
   }
 }
 
+const PLAYER_AVATAR_MAX_SIZE = 200
+const PLAYER_AVATAR_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'] as const
+const PLAYER_AVATAR_JPEG_QUALITY = 92
+
 const tableConfigs = {
   tournaments: {
     name: 'tournaments',
@@ -312,7 +316,7 @@ function sourcePathExt(sourceUrl: string, contentType = '') {
   if (contentType.includes('webp')) return '.webp'
   if (contentType.includes('gif')) return '.gif'
   if (contentType.includes('svg')) return '.svg'
-  return '.jpg'
+  return '.png'
 }
 
 function normalizeRemoteUrl(value: string) {
@@ -385,19 +389,42 @@ function commandExists(command: string) {
   return result.status === 0
 }
 
-function processAvatarWithConvert(inputPath: string, outputPath: string) {
-  return spawnSync('convert', [
+function ffmpegSupportsEncoder(encoder: string) {
+  const result = spawnSync('ffmpeg', ['-hide_banner', '-encoders'], { encoding: 'utf8' })
+  if (result.status !== 0) return false
+  return result.stdout.includes(encoder)
+}
+
+function pickAvatarOutputExt(inputExt: string) {
+  if (inputExt !== '.webp') return inputExt
+  if (commandExists('convert')) return '.webp'
+  return ffmpegSupportsEncoder('libwebp') || ffmpegSupportsEncoder('webp') ? '.webp' : '.png'
+}
+
+function processAvatarWithConvert(inputPath: string, outputPath: string, ext: string) {
+  const isRaster = ext !== '.svg'
+  const args = [
     inputPath,
     '-auto-orient',
     '-thumbnail',
-    '160x160>',
+    `${PLAYER_AVATAR_MAX_SIZE}x${PLAYER_AVATAR_MAX_SIZE}>`,
     '-strip',
-    outputPath,
+  ]
+  if (ext === '.jpg' || ext === '.jpeg') {
+    args.push('-sampling-factor', '4:4:4', '-quality', String(PLAYER_AVATAR_JPEG_QUALITY))
+  }
+  if (isRaster) args.push('-define', `${ext.replace(/^\./, '')}:preserve-settings=true`)
+  args.push(outputPath)
+  return spawnSync('convert', [
+    ...args,
   ], { encoding: 'utf8' })
 }
 
-function processAvatarWithFfmpeg(inputPath: string, outputPath: string) {
-  return spawnSync('ffmpeg', [
+function processAvatarWithFfmpeg(inputPath: string, outputPath: string, ext: string) {
+  const filters = [
+    `scale=if(gt(iw\\,${PLAYER_AVATAR_MAX_SIZE})\\,${PLAYER_AVATAR_MAX_SIZE}\\,iw):if(gt(ih\\,${PLAYER_AVATAR_MAX_SIZE})\\,${PLAYER_AVATAR_MAX_SIZE}\\,ih):force_original_aspect_ratio=decrease`,
+  ]
+  const args = [
     '-y',
     '-i',
     inputPath,
@@ -406,9 +433,28 @@ function processAvatarWithFfmpeg(inputPath: string, outputPath: string) {
     '-update',
     '1',
     '-vf',
-    'scale=if(gt(iw\\,160)\\,160\\,iw):if(gt(ih\\,160)\\,160\\,ih):force_original_aspect_ratio=decrease,format=yuvj420p',
-    outputPath,
-  ], { encoding: 'utf8' })
+    filters.join(','),
+  ]
+  if (ext === '.jpg' || ext === '.jpeg') {
+    args.push(
+      '-pix_fmt',
+      'yuvj444p',
+      '-q:v',
+      '2',
+      '-qmin',
+      '2',
+      '-qmax',
+      '2',
+    )
+  }
+  args.push(outputPath)
+  return spawnSync('ffmpeg', args, { encoding: 'utf8' })
+}
+
+function removeExistingPlayerAvatarFiles(mediaDir: string, slug: string) {
+  for (const ext of PLAYER_AVATAR_EXTENSIONS) {
+    rmSync(resolve(mediaDir, `${slug}${ext}`), { force: true })
+  }
 }
 
 async function resolveLiquipediaImageUrl(source: string) {
@@ -482,7 +528,7 @@ async function readMediaSource(sourceUrl: string) {
   }
 }
 
-async function preparePlayerAvatar(playerId: string | number, sourceUrl: unknown) {
+export async function preparePlayerAvatar(playerId: string | number, sourceUrl: unknown) {
   const source = typeof sourceUrl === 'string' ? sourceUrl.trim() : ''
   if (!source) return {}
   const media = await readMediaSource(source)
@@ -492,44 +538,41 @@ async function preparePlayerAvatar(playerId: string | number, sourceUrl: unknown
   mkdirSync(mediaDir, { recursive: true })
   const slug = slugifyMediaName(String(playerId))
   const tempInput = resolve(tmpdir(), `${slug}-${Date.now()}${media.ext}`)
-  const tempOutput = resolve(tmpdir(), `${slug}-${Date.now()}-160.jpg`)
-  const finalPath = resolve(mediaDir, `${slug}.jpg`)
-  const passthroughPath = resolve(mediaDir, `${slug}${media.ext}`)
+  const outputExt = pickAvatarOutputExt(media.ext)
+  const tempOutput = resolve(tmpdir(), `${slug}-${Date.now()}-200${outputExt}`)
+  const finalPath = resolve(mediaDir, `${slug}${outputExt}`)
   writeFileSync(tempInput, media.bytes)
   try {
     if (commandExists('convert')) {
-      const result = processAvatarWithConvert(tempInput, tempOutput)
+      const result = processAvatarWithConvert(tempInput, tempOutput, outputExt)
       if (result.status !== 0) {
         throw new AdminValidationError(`头像图片处理失败：${result.stderr || 'ImageMagick convert 执行失败'}`)
       }
-      rmSync(finalPath, { force: true })
-      rmSync(passthroughPath, { force: true })
+      removeExistingPlayerAvatarFiles(mediaDir, slug)
       writeFileSync(finalPath, readFileSync(tempOutput))
       return {
-        avatar: `/media/liquipedia/players/${slug}.jpg`,
+        avatar: `/media/liquipedia/players/${slug}${outputExt}`,
         avatar_source_url: media.normalizedSource,
       }
     }
 
-    if (commandExists('ffmpeg')) {
-      const result = processAvatarWithFfmpeg(tempInput, tempOutput)
+    if (outputExt !== '.svg' && commandExists('ffmpeg')) {
+      const result = processAvatarWithFfmpeg(tempInput, tempOutput, outputExt)
       if (result.status !== 0) {
         throw new AdminValidationError(`头像图片处理失败：${result.stderr || 'ffmpeg 执行失败'}`)
       }
-      rmSync(finalPath, { force: true })
-      rmSync(passthroughPath, { force: true })
+      removeExistingPlayerAvatarFiles(mediaDir, slug)
       writeFileSync(finalPath, readFileSync(tempOutput))
       return {
-        avatar: `/media/liquipedia/players/${slug}.jpg`,
+        avatar: `/media/liquipedia/players/${slug}${outputExt}`,
         avatar_source_url: media.normalizedSource,
       }
     }
 
-    rmSync(finalPath, { force: true })
-    rmSync(passthroughPath, { force: true })
-    writeFileSync(passthroughPath, media.bytes)
+    removeExistingPlayerAvatarFiles(mediaDir, slug)
+    writeFileSync(finalPath, media.bytes)
     return {
-      avatar: `/media/liquipedia/players/${slug}${media.ext}`,
+      avatar: `/media/liquipedia/players/${slug}${outputExt}`,
       avatar_source_url: media.normalizedSource,
     }
   } finally {

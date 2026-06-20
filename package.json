@@ -6,6 +6,7 @@
     "build": "nuxt build",
     "db:migrate": "tsx scripts/db/migrate.ts",
     "db:refresh": ".venv/bin/python3 scripts/crawler/refresh.py",
+    "db:refresh-player-avatars": "tsx scripts/refresh-player-avatars.ts",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
