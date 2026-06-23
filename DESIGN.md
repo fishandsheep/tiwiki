@@ -33,6 +33,10 @@ typography:
   mono:
     fontFamily: 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'
     fontWeight: 400
+  wordmark:
+    fontFamily: '"Cormorant Garamond","Times New Roman",serif'
+    fontWeight: 700
+    letterSpacing: "0.14em"
 rounded:
   sm: "6px"
   md: "10px"
@@ -127,9 +131,10 @@ components:
 ## 3. Typography
 
 **Display/Body Font:** "PingFang SC", "Microsoft YaHei", system-ui 系统无衬线栈
+**Wordmark Font:** "Cormorant Garamond"（仅用于小型 `ti` 标识）
 **Mono Font:** ui-monospace, SFMono-Regular, Menlo（奖金/名次数字）
 
-**Character:** 单一系统黑体栈，靠字重（400→900）与字号跨度做层级，不引入第二个字族。中文用系统字保证渲染锐利与零加载。等宽字体只给数字，让奖金位数与名次对齐成"面板感"。
+**Character:** 正文与标题使用系统黑体栈，靠字重（400→900）与字号跨度做层级；Cormorant Garamond 只作为两字母 `ti` wordmark，不进入标题/正文层级。中文用系统字保证渲染锐利与零加载。等宽字体只给数字，让奖金位数与名次对齐成"面板感"。
 
 ### Hierarchy
 - **Display** (900, clamp(1.875rem–3rem), 1.05, -0.02em): TI 编号大字（`TI6`）、页面主标题。奖杯铭牌感。
@@ -137,6 +142,7 @@ components:
 - **Body** (400, 0.875rem, 1.65): 简介与正文。mobile 默认 14px 保证密度与可读。
 - **Label** (500, 0.75–0.875rem, 0.02em): chip、表头、元信息。次重。
 - **Mono** (400, 0.75–0.875rem): 奖金 `$20,770,460`、名次编号。等宽对齐。
+- **Wordmark** (700, 0.14em tracking): 仅用于 `ti` 品牌符号，避免扩展成装饰性 serif 标题。
 
 ### Named Rules
 **The Weight-Not-Family Rule.** 层级靠字重 + 字号跨度（≥1.25 比率），不靠第二个字族。display 900 与 body 400 的跨度就是层级。
@@ -219,5 +225,5 @@ components:
 - **Don't** 做商业彩媒：弹窗广告、订阅 CTA 喧宾夺主。
 - **Don't** 配 `1px solid border` + `box-shadow blur ≥16px`（ghost-card 套路）——二选一。
 - **Don't** 卡片圆角 ≥24px——封顶 12–16px；全圆只给 chip/按钮。
-- **Don't** 用 gradient text（`background-clip:text` + 渐变）——单色，靠字重/字号做强调。
+- **Don't** 用渐变填充文字——单色，靠字重/字号做强调。
 - **Don't** 用闪烁/发光泛滥的动效——沉浸但不喧哗，每段动效服务于"让某事实被看见"。

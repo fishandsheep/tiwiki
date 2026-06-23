@@ -176,7 +176,7 @@ test('admin service keeps original avatar format for local file sources', async 
   const playerId = 'avatar-test-fixture'
   const pngPath = join(tempDir, 'avatar.png')
   const pngBytes = Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+kZ1cAAAAASUVORK5CYII=',
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAAB3YoTpAAAAAd0SU1FB+oGFw85L5eM/xwAAAAKSURBVAjXY2gAAACCAIHdQ2r0AAAAAElFTkSuQmCC',
     'base64',
   )
   writeFileSync(pngPath, pngBytes)
@@ -204,16 +204,26 @@ test('admin service keeps original avatar format for local file sources', async 
 test('admin service writes jpeg avatars with high-quality encoding', async () => {
   const db = createTestDb()
   const admin = createAdminService(db)
-  const source = 'https://liquipedia.net/commons/images/8/8c/Shadow_ESL_One_Manila_2016.jpg'
+  const tempDir = mkdtempSync(join(tmpdir(), 'tiwiki-avatar-jpeg-test-'))
   const originalCwd = process.cwd()
-  const outputPath = resolve(originalCwd, 'public/media/liquipedia/players/shadow.jpg')
+  const playerId = 'avatar-jpeg-fixture'
+  const jpegPath = join(tempDir, 'avatar.jpg')
+  const jpegBytes = Buffer.from(
+    '/9j/4AAQSkZJRgABAQAAAAAAAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==',
+    'base64',
+  )
+  writeFileSync(jpegPath, jpegBytes)
+  db.prepare('insert into players (id, handle, country) values (?, ?, ?)').run(playerId, 'JPEG Fixture', 'CN')
+  const outputPath = resolve(originalCwd, `public/media/liquipedia/players/${playerId}.jpg`)
 
   try {
-    const updated = await admin.updateRow('players', 'shadow', { avatar_source_url: source })
-    assert.equal(updated?.avatar, '/media/liquipedia/players/shadow.jpg')
+    const updated = await admin.updateRow('players', playerId, { avatar_source_url: pathToFileURL(jpegPath).toString() })
+    assert.equal(updated?.avatar, `/media/liquipedia/players/${playerId}.jpg`)
     const info = readFileSync(outputPath)
     assert.ok(info.length > 0)
   } finally {
+    rmSync(tempDir, { recursive: true, force: true })
+    rmSync(outputPath, { force: true })
     db.close()
   }
 })

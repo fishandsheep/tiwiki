@@ -16,28 +16,21 @@
         :style="heroMotionStyle"
       >
       </div>
-      <div class="relative mx-auto grid min-h-[inherit] max-w-shell items-center gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1.08fr)_360px] lg:gap-8 lg:py-0">
+      <div class="relative mx-auto grid min-h-[inherit] max-w-shell items-center gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-10 lg:py-0">
         <div class="min-w-0">
           <span class="chip chip-gold">Dota2 · The International</span>
           <h1 class="mt-3 text-[2.15rem] font-black leading-[1.06] text-ink-main sm:text-[2.7rem] lg:max-w-[12ch] lg:text-[3rem]">
             <span class="ti-wordmark text-[2.55rem] sm:text-[3.15rem] lg:text-[3.55rem]">ti</span> 百科
           </h1>
           <p class="mt-3 max-w-[62ch] text-[0.95rem] leading-7 text-ink-muted lg:max-w-[58ch]">
-            Dota2 国际邀请赛中文资料库。收录 Ti1 到 Ti14 与 2020 取消条目，快速看清每届冠军、奖金池、参赛队伍、最终排名与中国战队表现。
+            Dota2 国际邀请赛中文资料库。按年份梳理冠军、奖金池、最终排名与中国战队表现，打开任一届，30 秒看清结果、背景与中国最佳名次。
           </p>
-          <div class="mt-4 max-w-[58ch]">
-            <h2 class="text-[0.95rem] font-bold text-ink-main">什么是 ti</h2>
-            <div class="mt-2 space-y-2 text-[0.92rem] leading-7 text-ink-muted">
-              <p>The International（简称 ti）是 Valve 主办的 Dota 2 世界最高规格赛事，自 2011 年起举办。</p>
-              <p>每届 Ti 都记录版本演进、地区格局与冠军阵容，是职业 Dota 最具代表性的年度舞台。</p>
-            </div>
-          </div>
           <div class="mt-5 flex flex-wrap gap-3">
             <NuxtLink to="/ti" class="inline-flex min-h-11 items-center rounded-lg bg-gold px-4 py-2 text-sm font-bold text-bg-main shadow-[0_0_8px_rgb(var(--gold)/0.18)] transition-opacity hover:opacity-90">
-              浏览历届赛事 →
+              进入赛事索引 →
             </NuxtLink>
             <NuxtLink to="/china" class="inline-flex min-h-11 items-center rounded-lg border border-edge bg-bg-card/45 px-4 py-2 text-sm font-medium text-ink-main transition-colors hover:border-gold/60">
-              中国战队表现
+              看中国战绩
             </NuxtLink>
           </div>
         </div>
@@ -82,17 +75,47 @@
       </div>
     </section>
 
-    <!-- 数据概览 -->
-    <section class="mx-auto max-w-shell px-4 py-8">
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard v-for="(s, i) in statsCards" :key="s.label" v-reveal :style="{ '--i': i }" v-bind="s" />
+    <!-- 30 秒索引 -->
+    <section v-reveal class="reveal mx-auto max-w-shell px-4 py-7">
+      <div class="home-intro-band">
+        <div class="min-w-0">
+          <h2 class="text-lg font-black text-ink-main sm:text-xl">30 秒读懂 Ti</h2>
+          <div class="mt-2 max-w-[66ch] space-y-1 text-sm leading-7 text-ink-muted">
+            <p>The International（简称 Ti）是 Valve 主办的 Dota 2 世界最高规格赛事，自 2011 年起举办。</p>
+            <p>这里按届次保留冠军、奖金池、队伍排名与中国战队最佳成绩，先给结论，再给完整数据。</p>
+          </div>
+        </div>
+
+        <div class="home-metric-strip">
+          <div v-for="s in statsCards" :key="s.label" class="home-metric">
+            <p class="text-xs text-ink-muted">{{ s.label }}</p>
+            <p class="mt-1 font-mono text-xl font-black text-ink-main">
+              {{ s.value }}<span v-if="s.suffix" class="ml-0.5 font-sans text-sm font-medium text-ink-muted">{{ s.suffix }}</span>
+            </p>
+            <p v-if="s.sub" class="mt-0.5 text-xs text-gold/80">{{ s.sub }}</p>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- 核心入口 -->
-    <section class="mx-auto max-w-shell px-4 pb-2">
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <QuickEntry v-for="(e, i) in entries" :key="e.to" v-reveal :style="{ '--i': i }" v-bind="e" />
+    <section class="mx-auto max-w-shell px-4 pb-4">
+      <div v-reveal class="reveal home-route-rail">
+        <NuxtLink
+          v-for="e in entries"
+          :key="e.to"
+          :to="e.to"
+          class="group home-route-link"
+        >
+          <span class="home-route-icon">
+            <Icon :name="e.icon" :size="22" />
+          </span>
+          <span class="min-w-0">
+            <span class="block text-sm font-bold text-ink-main">{{ e.label }}</span>
+            <span class="mt-0.5 block text-xs text-ink-muted">{{ e.desc }}</span>
+          </span>
+          <span class="ml-auto text-sm text-gold transition-transform group-hover:translate-x-1">→</span>
+        </NuxtLink>
       </div>
     </section>
 

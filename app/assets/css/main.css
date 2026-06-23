@@ -35,7 +35,7 @@ html {
 
 body {
   margin: 0;
-  font-family: theme('fontFamily.sans');
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at 12% 8%, rgb(var(--red) / 0.2), transparent 30rem),
@@ -190,6 +190,30 @@ body {
       radial-gradient(ellipse 42% 58% at calc(78% + var(--hero-hot-x)) calc(45% + var(--hero-hot-y)), rgb(var(--red-bright) / 0.24) 0, transparent 62%),
       radial-gradient(circle at 52% 108%, rgb(var(--ember) / 0.12), transparent 36%);
   }
+  .home-intro-band {
+    @apply grid gap-5 border-y border-edge py-5 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] lg:items-center lg:gap-8;
+    background:
+      linear-gradient(90deg, rgb(var(--gold) / 0.05), transparent 34%),
+      linear-gradient(180deg, rgb(var(--bg-card) / 0.36), transparent);
+  }
+  .home-metric-strip {
+    @apply grid gap-3 sm:grid-cols-3 lg:gap-0;
+  }
+  .home-metric {
+    @apply border-t border-edge pt-3 sm:border-l sm:border-t-0 sm:pl-4 lg:pl-5;
+  }
+  .home-metric:first-child {
+    @apply border-t-0 sm:border-l-0 sm:pl-0;
+  }
+  .home-route-rail {
+    @apply divide-y divide-edge border-y border-edge sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0;
+  }
+  .home-route-link {
+    @apply flex min-h-16 items-center gap-3 px-1 py-3 transition-colors hover:bg-bg-subtle/45 sm:px-4;
+  }
+  .home-route-icon {
+    @apply grid h-9 w-9 shrink-0 place-items-center text-gold;
+  }
 
 }
 
@@ -228,7 +252,7 @@ body {
 }
 .scroll-x::-webkit-scrollbar-thumb {
   background: rgb(var(--border));
-  border-radius: 3px;
+  border-radius: 6px;
 }
 
 /* ===== Motion =====
