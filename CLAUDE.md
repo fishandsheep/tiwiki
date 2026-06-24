@@ -16,6 +16,7 @@ npm run preview          # serve generated output locally
 
 npm run db:migrate       # Drizzle create/migrate (run on schema change or first setup)
 npm run db:refresh       # run Python crawler to refresh data/ti.db (needs .venv)
+npm run db:refresh-player-avatars  # download/process player avatars from avatar_source_url (accepts optional player ID args)
 
 npm test                 # server + crawler suites
 npm run test:server      # tsx --test server/tests/**/*.test.ts

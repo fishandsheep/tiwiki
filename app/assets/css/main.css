@@ -191,22 +191,25 @@ body {
       radial-gradient(circle at 52% 108%, rgb(var(--ember) / 0.12), transparent 36%);
   }
   .home-intro-band {
-    @apply grid gap-5 border-y border-edge py-5 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] lg:items-center lg:gap-8;
+    @apply grid gap-5 rounded-xl border border-edge px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] lg:items-center lg:gap-6 lg:px-6 overflow-hidden;
     background:
       linear-gradient(90deg, rgb(var(--gold) / 0.05), transparent 34%),
       linear-gradient(180deg, rgb(var(--bg-card) / 0.36), transparent);
   }
   .home-metric-strip {
-    @apply grid gap-3 sm:grid-cols-3 lg:gap-0;
+    @apply grid gap-2 overflow-hidden sm:grid-cols-3 sm:gap-3 lg:gap-0;
   }
   .home-metric {
-    @apply border-t border-edge pt-3 sm:border-l sm:border-t-0 sm:pl-4 lg:pl-5;
+    @apply min-w-0 overflow-hidden border-t border-edge pt-2 sm:border-l sm:border-t-0 sm:pl-2 lg:pl-3;
+  }
+  .home-metric .font-mono {
+    @apply text-lg;
   }
   .home-metric:first-child {
     @apply border-t-0 sm:border-l-0 sm:pl-0;
   }
   .home-route-rail {
-    @apply divide-y divide-edge border-y border-edge sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0;
+    @apply rounded-xl border border-edge divide-y divide-edge overflow-hidden sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0;
   }
   .home-route-link {
     @apply flex min-h-16 items-center gap-3 px-1 py-3 transition-colors hover:bg-bg-subtle/45 sm:px-4;
