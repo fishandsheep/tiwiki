@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
   const detail = await getTournamentDetail(id)
   if (!detail) {
-    throw createError({ statusCode: 404, statusMessage: '未找到该届 TI' })
+    throw createError({ statusCode: 404, statusMessage: '未找到该届 Ti' })
   }
   return detail
 })

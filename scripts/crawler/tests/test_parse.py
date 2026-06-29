@@ -9,24 +9,76 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.append(str(ROOT / "scripts" / "crawler"))
 
 from parse import build_cancelled_2020, parse_infobox, parse_participants, parse_placements, parse_placements_from_html, parse_number  # noqa: E402
+from fetch import WikiFetcher  # noqa: E402
 from refresh import load_seed_teams, load_seed_tournaments  # noqa: E402
+
+
+def read_or_fetch_json(path: Path, loader) -> dict:
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    payload = loader()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return payload
 
 
 def load_cached_wikitext(year: int) -> str:
     path = ROOT / ".cache" / "crawler" / f"liquipedia-The_International_{year}.json"
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    fetcher = WikiFetcher()
+    payload = read_or_fetch_json(
+        path,
+        lambda: fetcher._request(  # type: ignore[attr-defined]
+            "https://liquipedia.net/dota2/api.php",
+            {
+                "action": "query",
+                "prop": "revisions",
+                "rvprop": "content",
+                "rvslots": "main",
+                "titles": f"The International/{year}",
+                "redirects": 1,
+                "format": "json",
+                "formatversion": 2,
+            },
+            path.name,
+        ),
+    )
     return payload["query"]["pages"][0]["revisions"][0]["slots"]["main"]["content"]
 
 
 def load_cached_html(year: int) -> str:
     path = ROOT / ".cache" / "crawler" / f"liquipedia-parse-The_International_{year}.json"
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    fetcher = WikiFetcher()
+    payload = read_or_fetch_json(
+        path,
+        lambda: fetcher.session.get(
+            "https://liquipedia.net/dota2/api.php",
+            params={"action": "parse", "page": f"The International/{year}", "prop": "text", "format": "json"},
+            timeout=30,
+        ).json(),
+    )
     return payload["parse"]["text"]["*"]
 
 
 def load_cached_prizepool(year: int) -> str:
     path = ROOT / ".cache" / "crawler" / f"liquipedia-The_International_{year}_prizepool.json"
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    fetcher = WikiFetcher()
+    payload = read_or_fetch_json(
+        path,
+        lambda: fetcher._request(  # type: ignore[attr-defined]
+            "https://liquipedia.net/dota2/api.php",
+            {
+                "action": "query",
+                "prop": "revisions",
+                "rvprop": "content",
+                "rvslots": "main",
+                "titles": f"The International/{year}/prizepool",
+                "redirects": 1,
+                "format": "json",
+                "formatversion": 2,
+            },
+            path.name,
+        ),
+    )
     return payload["query"]["pages"][0]["revisions"][0]["slots"]["main"]["content"]
 
 
@@ -77,6 +129,22 @@ class ParseTests(unittest.TestCase):
         self.assertIn("yakutou-brothers", team_ids)
         self.assertIn("team-falcons", teams)
         self.assertTrue(any(row["role"] == "教练" for row in rosters if row["team_id"] == "team-falcons"))
+
+    def test_2026_parses_participants_without_final_placements(self) -> None:
+        wikitext = load_cached_wikitext(2026)
+        prize_pool_usd = parse_number(load_cached_prizepool(2026))
+        participants, alias_to_team_id, players, rosters, teams = parse_participants(wikitext, self.seed_teams)
+        placements = parse_placements(wikitext, prize_pool_usd, alias_to_team_id, teams, participants)
+
+        self.assertEqual(len(participants), 16)
+        self.assertGreaterEqual(len(players), 80)
+        self.assertGreaterEqual(len(rosters), 80)
+        self.assertEqual(len(placements), 0)
+        self.assertIn("xtreme-gaming", teams)
+        self.assertIn("team-resilience", teams)
+        self.assertTrue(any(row["role"] == "教练" for row in rosters if row["team_id"] == "xtreme-gaming"))
+        self.assertTrue(any(player["handle"] == "Corrupted" and player["liquipedia_url"].endswith("/Vazya") for player in players))
+        self.assertTrue(any(row["role"] == "助理教练" for row in rosters if row["team_id"] == "lgd-gaming"))
 
     def test_2020_cancelled_entry(self) -> None:
         tournament = build_cancelled_2020(self.seed_tournaments.get(2020))

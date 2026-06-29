@@ -89,6 +89,6 @@ defineProps<{ rosters: TeamRoster[]; status: TournamentStatus; activeTeamId?: st
 
 function initials(value: string) {
   const cleaned = value.replace(/[^a-z0-9]/gi, '')
-  return cleaned.slice(0, 2).toUpperCase() || 'TI'
+  return cleaned.slice(0, 2).toUpperCase() || 'Ti'
 }
 </script>

@@ -3,7 +3,7 @@
     <header class="border-b border-edge bg-bg-main/95">
       <div class="mx-auto flex min-h-14 max-w-[1500px] flex-wrap items-center gap-3 px-4 py-3">
         <NuxtLink to="/" class="flex min-h-10 items-center gap-2">
-          <span class="ti-wordmark grid h-8 w-8 place-items-center rounded-md bg-gold text-sm text-bg-main">ti</span>
+          <span class="ti-wordmark grid h-8 w-8 place-items-center rounded-md bg-gold text-sm text-bg-main">Ti</span>
           <span class="font-bold text-ink-main">数据管理台</span>
         </NuxtLink>
         <span class="chip">本地 data/ti.db</span>
@@ -144,6 +144,7 @@
               :disabled="isFieldReadonly(field)"
             >
               <option value="completed">completed</option>
+              <option value="ongoing">ongoing</option>
               <option value="cancelled">cancelled</option>
             </select>
             <select
@@ -464,5 +465,5 @@ function readableError(error: unknown) {
   return error instanceof Error ? error.message : '操作失败'
 }
 
-useHead({ title: '数据管理台 — TI 百科' })
+useHead({ title: '数据管理台 — Ti 百科' })
 </script>

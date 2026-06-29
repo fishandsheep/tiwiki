@@ -17,8 +17,10 @@ from parse import (
     parse_infobox,
     parse_number,
     parse_participants,
+    parse_player_profile,
     parse_placements,
     parse_placements_from_html,
+    parse_team_wikitext,
     parse_player_wikitext,
 )
 
@@ -74,6 +76,15 @@ def resolve_media(fetcher: WikiFetcher, raw: str, kind: str, slug: str) -> tuple
 def hydrate_media(fetcher: WikiFetcher, teams: dict[str, dict], participants: list[dict], players: list[dict], rosters: list[dict]) -> None:
     for participant in participants:
         team = teams.get(participant["team_id"])
+        if team and (not team.get("logo") or not team.get("region") or not team.get("country")):
+            try:
+                raw = fetcher.fetch_wikitext(team["name"].replace(" ", "_"))
+                profile = parse_team_wikitext(raw)
+                team["logo"] = team.get("logo") or profile.get("image", "")
+                team["region"] = team.get("region") or profile.get("region", "")
+                team["country"] = team.get("country") or profile.get("country", "")
+            except Exception as exc:  # noqa: BLE001
+                print(f"warn: team profile fetch failed for {team['name']}: {exc}", file=sys.stderr)
         raw_logo = (team or {}).get("logo", "")
         logo, source = resolve_media(fetcher, raw_logo, "teams", participant["team_id"])
         if logo:
@@ -86,13 +97,20 @@ def hydrate_media(fetcher: WikiFetcher, teams: dict[str, dict], participants: li
         player = player_by_id.get(roster["player_id"])
         if player is None:
             continue
-        if not player.get("avatar") or not roster.get("player_country"):
+        if not player.get("avatar") or (not roster.get("player_country") and not player.get("country")):
             try:
-                raw = fetcher.fetch_wikitext(player["handle"].replace(" ", "_"))
+                title = player.get("liquipedia_url", "").rsplit("/", 1)[-1] or player["handle"].replace(" ", "_")
+                raw = fetcher.fetch_wikitext(title)
                 profile = parse_player_wikitext(raw)
                 roster["player_country"] = roster.get("player_country") or profile.get("country", "")
                 player["avatar"] = player.get("avatar") or profile.get("avatar", "")
                 player["country"] = player.get("country") or profile.get("country", "")
+                if not player.get("avatar") or not roster.get("player_country"):
+                    html = fetcher.fetch_parsed_html(title)
+                    html_profile = parse_player_profile(html)
+                    roster["player_country"] = roster.get("player_country") or html_profile.get("country", "")
+                    player["avatar"] = player.get("avatar") or html_profile.get("avatar", "")
+                    player["country"] = player.get("country") or html_profile.get("country", "")
             except Exception as exc:  # noqa: BLE001
                 print(f"warn: profile fetch failed for {player['handle']}: {exc}", file=sys.stderr)
         raw_avatar = player.get("avatar", "")
@@ -100,8 +118,8 @@ def hydrate_media(fetcher: WikiFetcher, teams: dict[str, dict], participants: li
         if avatar:
             player["avatar"] = avatar
             player["avatar_source_url"] = source
-        if roster.get("player_country"):
-            player["country"] = player.get("country") or roster["player_country"]
+        player["country"] = player.get("country") or roster.get("player_country", "")
+        roster["player_country"] = roster.get("player_country") or player.get("country", "")
 
 
 def main() -> int:

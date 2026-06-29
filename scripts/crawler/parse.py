@@ -39,6 +39,11 @@ def get_raw_param(template: Any, name: str, default: str = "") -> str:
     return default
 
 
+def page_title_to_url(title: str) -> str:
+    page = title.strip().replace(" ", "_")
+    return f"https://liquipedia.net/dota2/{page}" if page else ""
+
+
 def parse_number(value: str) -> int:
     digits = re.sub(r"[^0-9]", "", value)
     return int(digits) if digits else 0
@@ -174,10 +179,11 @@ def upsert_player(
     country: str = "",
     avatar: str = "",
     avatar_source_url: str = "",
+    page_title: str = "",
 ) -> str:
     player_id = slugify(handle)
     existing = players.get(player_id, {})
-    liquipedia_url = f"https://liquipedia.net/dota2/{handle.replace(' ', '_')}"
+    liquipedia_url = page_title_to_url(page_title or handle)
     players[player_id] = {
         "id": player_id,
         "handle": handle,
@@ -329,9 +335,12 @@ def parse_participants(wikitext: str, seed_teams: dict[str, SeedTeam]) -> tuple[
                 role = get_param(person, "role") or "选手"
                 player_country = extract_country_from_template(person)
                 player_avatar = extract_image_param(person)
-                player_id = upsert_player(players, handle, player_country, player_avatar)
+                player_link = get_param(person, "link")
+                player_id = upsert_player(players, handle, player_country, player_avatar, page_title=player_link or handle)
                 if role == "coach":
                     role_label = "教练"
+                elif role == "assistant coach":
+                    role_label = "助理教练"
                 elif role.isdigit():
                     role_label = f"{role} 号位"
                 else:
@@ -562,6 +571,23 @@ def parse_player_wikitext(wikitext: str) -> dict[str, str]:
     return result
 
 
+def parse_team_wikitext(wikitext: str) -> dict[str, str]:
+    result = {"name": "", "image": "", "region": "", "country": ""}
+    if not wikitext:
+        return result
+    code = mwparserfromhell.parse(wikitext)
+    for template in code.filter_templates(recursive=True):
+        name = clean_template_name(template)
+        if name not in {"infobox team", "infobox esports team", "infobox organization"}:
+            continue
+        result["name"] = get_param(template, "name")
+        result["image"] = extract_image_param(template)
+        result["region"] = get_param(template, "region")
+        result["country"] = get_param(template, "location") or get_param(template, "country")
+        break
+    return result
+
+
 def parse_infobox(wikitext: str) -> dict[str, Any]:
     code = mwparserfromhell.parse(wikitext)
     infobox = None
@@ -578,28 +604,29 @@ def parse_infobox(wikitext: str) -> dict[str, Any]:
         "end_date": get_param(infobox, "edate"),
         "country": get_param(infobox, "country"),
         "city": get_param(infobox, "city"),
-        "venue": get_param(infobox, "venue"),
+        "venue": get_param(infobox, "venue") or get_param(infobox, "venue1"),
     }
 
 
 def build_tournament(year: int, ti_no: int, prize_pool_usd: int, info: dict[str, Any], placements: list[dict[str, Any]], seed: dict[str, Any] | None) -> dict[str, Any]:
     champion = next((row for row in placements if row["rank"] == 1), None)
     runner_up = next((row for row in placements if row["rank"] == 2), None)
+    status = "completed" if champion and runner_up else "ongoing"
     name_zh = seed["nameZh"] if seed and seed.get("nameZh") else f"第{ti_no}届 Dota2 国际邀请赛"
     summary_zh = seed["summaryZh"] if seed and seed.get("summaryZh") else ""
     china_summary = seed["chinaSummary"] if seed and seed.get("chinaSummary") else ""
     return {
         "id": f"ti{ti_no}",
-        "status": "completed",
+        "status": status,
         "ti_no": ti_no,
         "name": info["name"] or f"The International {year}",
         "name_zh": name_zh,
         "year": year,
-        "start_date": info["start_date"],
-        "end_date": info["end_date"],
-        "country": info["country"],
-        "city": info["city"],
-        "venue": info["venue"],
+        "start_date": seed.get("startDate") if seed and seed.get("startDate") else info["start_date"],
+        "end_date": seed.get("endDate") if seed and seed.get("endDate") else info["end_date"],
+        "country": seed.get("country") if seed and seed.get("country") else info["country"],
+        "city": seed.get("city") if seed and seed.get("city") else info["city"],
+        "venue": seed.get("venue") if seed and seed.get("venue") else info["venue"],
         "prize_pool_usd": prize_pool_usd,
         "champion_team_id": champion["team_id"] if champion else "",
         "runner_up_team_id": runner_up["team_id"] if runner_up else "",

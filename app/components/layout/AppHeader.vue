@@ -6,10 +6,10 @@
       <NuxtLink to="/" class="flex min-h-11 items-center gap-2">
         <span
           class="ti-wordmark grid h-8 w-8 place-items-center rounded-md bg-gold text-sm text-bg-main"
-          >ti</span
+          >Ti</span
         >
         <span class="text-base font-bold tracking-wide text-ink-main"
-          ><span class="ti-wordmark text-lg">ti</span> 百科</span
+          ><span class="ti-wordmark text-lg">Ti</span> 百科</span
         >
       </NuxtLink>
 

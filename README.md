@@ -1,6 +1,6 @@
-# TI 百科 — Dota2 国际邀请赛中文资料库
+# Ti 百科 — Dota2 国际邀请赛中文资料库
 
-中文 Dota2 TI（The International）历届赛事资料站。Mobile First 自适应，深色电竞风。
+中文 Dota2 Ti（The International）历届赛事资料站。Mobile First 自适应，深色电竞风。
 
 ## 技术栈
 
@@ -48,6 +48,12 @@ Liquipedia → scripts/crawler (Python) → data/ti.db
 
 爬虫写「事实字段」（队伍、名次、奖金、阵容、参赛队伍等）；`summaryZh` / `chinaSummary` 为人工中文原创，爬虫不覆写。
 
+当前数据约定：
+
+- 页面中赛事缩写统一显示为 `Ti`，如 `Ti6`、`Ti15`
+- `Ti15` 预选赛已结束，详情页会展示全部参赛战队与选手
+- `Ti15` 最终排名未定，排名位先显示 `-`，并按赛区罗列
+
 ## 命令
 
 ```bash
@@ -72,7 +78,7 @@ python3 -m venv .venv
 
 - `/` 首页
 - `/ti` 历届赛事列表
-- `/ti/:tiNo` TI 详情（如 `/ti/6`）
+- `/ti/:tiNo` Ti 详情（如 `/ti/6`）
 - `/china` 中国战队专题
 - `/rankings` 榜单（冠军 / 奖金池 / 中国战队 / 选手冠军）
 

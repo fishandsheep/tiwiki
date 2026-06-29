@@ -18,9 +18,9 @@
       </div>
       <div class="relative mx-auto grid min-h-[inherit] max-w-shell items-center gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-10 lg:py-0">
         <div class="min-w-0">
-          <span class="chip chip-gold">Dota2 · The International</span>
+              <span class="chip chip-gold">Dota2 · The International</span>
           <h1 class="mt-3 text-[2.15rem] font-black leading-[1.06] text-ink-main sm:text-[2.7rem] lg:max-w-[12ch] lg:text-[3rem]">
-            <span class="ti-wordmark text-[2.55rem] sm:text-[3.15rem] lg:text-[3.55rem]">ti</span> 百科
+            <span class="ti-wordmark text-[2.55rem] sm:text-[3.15rem] lg:text-[3.55rem]">Ti</span> 百科
           </h1>
           <p class="mt-3 max-w-[62ch] text-[0.95rem] leading-7 text-ink-muted lg:max-w-[58ch]">
             Dota2 国际邀请赛中文资料库。按年份梳理冠军、奖金池、最终排名与中国战队表现，打开任一届，30 秒看清结果、背景与中国最佳名次。
@@ -42,7 +42,7 @@
         >
           <div class="border-b border-edge bg-gold/6 px-4 py-3">
             <div class="flex items-center justify-between gap-3">
-              <span class="chip chip-gold">最新结果</span>
+              <span class="chip chip-gold">{{ featured.status === 'ongoing' ? '最新赛事' : '最新结果' }}</span>
               <span class="text-sm font-bold text-gold">{{ formatTiLabel(featured.tiNo) }}</span>
             </div>
             <p class="mt-2 text-lg font-black text-ink-main">{{ featured.nameZh }}</p>
@@ -51,7 +51,7 @@
 
           <div class="space-y-4 px-4 py-4">
             <div>
-              <p class="text-xs text-ink-muted">冠军</p>
+              <p class="text-xs text-ink-muted">{{ featured.status === 'ongoing' ? '状态' : '冠军' }}</p>
               <p class="mt-1 text-2xl font-black text-gold">{{ featured.champion }}</p>
             </div>
 
@@ -171,7 +171,7 @@ function resetHeroPointer() {
 const featured = computed(() => tournaments.value[0] ?? null)
 
 const latestChinaTag = computed(() => {
-  if (!featured.value || featured.value.status === 'cancelled') return ''
+  if (!featured.value || featured.value.status !== 'completed') return ''
   const r = featured.value.bestChinaRank
   if (r == null) return ''
   if (r === 1) return `🇨🇳 ${placementLabel(r)}`
@@ -181,11 +181,11 @@ const latestChinaTag = computed(() => {
 const statsCards = computed(() => [
   { label: '收录届数', value: String(stats.value.totalTIs) },
   { label: '中国冠军', value: String(stats.value.chinaChampionsCount), suffix: '次' },
-  { label: '最高奖金池', value: formatUsd(stats.value.maxPrizePool), sub: 'Ti' + stats.value.maxPrizeTiNo },
+  { label: '最高奖金池', value: formatUsd(stats.value.maxPrizePool), sub: formatTiLabel(stats.value.maxPrizeTiNo) },
 ])
 
 const entries = [
-  { to: '/ti', label: '历届赛事', icon: 'trophy', desc: 'Ti1 到 Ti14 与 2020' },
+  { to: '/ti', label: '历届赛事', icon: 'trophy', desc: 'Ti1 到 Ti15 与 2020' },
   { to: '/china', label: '中国战队', icon: 'pin', desc: '中国战队成绩' },
   { to: '/rankings', label: '榜单', icon: 'chart', desc: '奖金池 / 冠军选手' },
 ]

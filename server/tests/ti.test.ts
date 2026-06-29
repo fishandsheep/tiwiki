@@ -11,6 +11,26 @@ test('listTournaments includes cancelled 2020 entry', async () => {
   assert.equal(cancelled?.routeId, '2020')
 })
 
+test('Ti15 ongoing entry can exist without final placements', async () => {
+  const tournaments = await listTournaments()
+  const ti15 = tournaments.find((t) => t.tiNo === 15)
+  assert.ok(ti15)
+  assert.equal(ti15?.status, 'ongoing')
+  assert.equal(ti15?.champion, '—')
+  assert.equal(ti15?.runnerUp, '—')
+  assert.equal(ti15?.bestChinaRank, null)
+})
+
+test('Ti15 detail shows all qualified teams while final ranking pending', async () => {
+  const detail = await getTournamentDetail('15')
+  assert.ok(detail)
+  assert.equal(detail?.status, 'ongoing')
+  assert.equal(detail?.placements.length, 16)
+  assert.ok(detail?.placements.every((placement) => placement.rank === 0))
+  assert.ok(detail?.placements.every((placement) => placement.region))
+  assert.ok(detail?.rosters.some((team) => team.teamId === 'lgd-gaming' && team.players.some((player) => player.handle === 'fcr' && player.role === '助理教练')))
+})
+
 test('TI6 detail has placements and rosters', async () => {
   const detail = await getTournamentDetail('6')
   assert.ok(detail)

@@ -57,7 +57,7 @@ let activeTeamTimer: ReturnType<typeof window.setTimeout> | null = null
 
 const { data: detail } = await useTournament(id)
 if (!detail.value) {
-  throw createError({ statusCode: 404, statusMessage: '未找到该届 ti', fatal: true })
+  throw createError({ statusCode: 404, statusMessage: '未找到该届 Ti', fatal: true })
 }
 
 const { data: china } = await useChinaPerformance(detail.value.id)

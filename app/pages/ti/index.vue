@@ -66,8 +66,8 @@
 <script setup lang="ts">
 const { data: tournaments } = await useTournaments()
 const maxNo = computed(() => {
-  const completed = tournaments.value.filter((t) => t.status === 'completed')
-  return completed.length ? completed[0].tiNo : 14
+  const numbered = tournaments.value.filter((t) => t.status !== 'cancelled')
+  return numbered.length ? Math.max(...numbered.map((t) => t.tiNo)) : 14
 })
 
 const q = ref('')

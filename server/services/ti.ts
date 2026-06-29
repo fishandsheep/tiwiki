@@ -20,7 +20,20 @@ function routeIdFor(t: Pick<Tournament, 'status' | 'year' | 'tiNo'>) {
 }
 
 function tournamentLabel(t: Pick<Tournament, 'status' | 'tiNo' | 'year'>) {
-  return t.status === 'cancelled' ? `${t.year}（取消）` : `TI${t.tiNo}`
+  return t.status === 'cancelled' ? `${t.year}（取消）` : `Ti${t.tiNo}`
+}
+
+const regionPriority = ['中国', '欧洲', '独联体', '北美', '南美', '东南亚', '中东与北非', '美洲']
+
+function regionSortValue(region?: string | null) {
+  const value = (region || '').trim()
+  const index = regionPriority.indexOf(value)
+  return index === -1 ? regionPriority.length : index
+}
+
+function compareRegionThenName<T extends { region?: string; teamName: string }>(a: T, b: T) {
+  return regionSortValue(a.region) - regionSortValue(b.region)
+    || a.teamName.localeCompare(b.teamName, 'en')
 }
 
 function dateRangeText(startDate: string, endDate: string, status: Tournament['status']) {
@@ -34,6 +47,9 @@ function buildSummaryZh(t: Tournament) {
   if (t.summaryZh?.trim()) return t.summaryZh
   if (t.status === 'cancelled') {
     return `${t.year} 年国际邀请赛原定于 ${t.city || t.country || '原计划举办地'} 举行，后因疫情原因取消，未产生冠军与最终排名。`
+  }
+  if (t.status === 'ongoing') {
+    return `${tournamentLabel(t)} 将于 ${dateRangeText(t.startDate, t.endDate, t.status)} 在 ${t.city} ${t.venue} 举办，参赛名单已定，最终排名待定。`
   }
   return `${tournamentLabel(t)} 于 ${dateRangeText(t.startDate, t.endDate, t.status)} 在 ${t.city} ${t.venue} 举办，冠军为 ${t.champion}，总奖金池 ${t.prizePoolUsd.toLocaleString('en-US')} 美元。`
 }
@@ -113,8 +129,8 @@ function normalizeTournament(row: typeof schema.tournaments.$inferSelect): Tourn
     city: row.city || '',
     venue: row.venue || '',
     prizePoolUsd: row.prizePoolUsd || 0,
-    champion: row.championTeamId ? '' : row.status === 'cancelled' ? '—' : '',
-    runnerUp: row.runnerUpTeamId ? '' : row.status === 'cancelled' ? '—' : '',
+    champion: row.championTeamId ? '' : row.status === 'completed' ? '' : '—',
+    runnerUp: row.runnerUpTeamId ? '' : row.status === 'completed' ? '' : '—',
     championTeamId: row.championTeamId || '',
     runnerUpTeamId: row.runnerUpTeamId || '',
     summaryZh: row.summaryZh || '',
@@ -140,8 +156,8 @@ async function enrichTournamentNames(rows: typeof schema.tournaments.$inferSelec
 
   return tournaments.map((t) => ({
     ...t,
-    champion: teamMap.get(t.championTeamId) || (t.status === 'cancelled' ? '—' : ''),
-    runnerUp: teamMap.get(t.runnerUpTeamId) || (t.status === 'cancelled' ? '—' : ''),
+    champion: teamMap.get(t.championTeamId) || (t.status === 'completed' ? '' : '—'),
+    runnerUp: teamMap.get(t.runnerUpTeamId) || (t.status === 'completed' ? '' : '—'),
   }))
 }
 
@@ -180,7 +196,7 @@ export async function listTournaments(): Promise<TournamentSummary[]> {
   return tournaments.map((t) => ({
     ...t,
     summaryZh: buildSummaryZh(t),
-    bestChinaRank: t.status === 'cancelled' ? null : bestChinaMap.get(t.id) ?? null,
+    bestChinaRank: t.status === 'completed' ? (bestChinaMap.get(t.id) ?? null) : null,
     participantTeamNames: participantMap.get(t.id) || [],
   }))
 }
@@ -224,7 +240,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     region: translateRegion(row.region || row.teamRegion || ''),
     country: row.country || '',
     inviteType: translateInviteType(row.inviteType || '', row.region || row.teamRegion || ''),
-  }))
+  })).sort(compareRegionThenName)
 
   const participantMap = new Map(participants.map((p) => [p.teamId, p]))
 
@@ -251,7 +267,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     .where(eq(schema.placements.tournamentId, tournament.id))
     .orderBy(asc(schema.placements.rank), asc(schema.teams.name))
 
-  const placements: Placement[] = placementRows.map((row) => ({
+  let placements: Placement[] = placementRows.map((row) => ({
     tournamentId: row.tournamentId,
     rank: row.rank,
     teamId: row.teamId,
@@ -263,6 +279,23 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     region: participantMap.get(row.teamId)?.region || '',
     inviteType: participantMap.get(row.teamId)?.inviteType || '',
   }))
+
+  if (tournament.status === 'ongoing' && !placements.length) {
+    placements = participants
+      .map((participant) => ({
+        tournamentId: participant.tournamentId,
+        rank: 0,
+        teamId: participant.teamId,
+        teamName: participant.teamName,
+        teamLogo: participant.teamLogo,
+        teamLiquipediaUrl: participant.teamLiquipediaUrl,
+        prizeUsd: 0,
+        isChinaTeam: participant.region === '中国' || participant.country === '中国',
+        region: participant.region,
+        inviteType: participant.inviteType,
+      }))
+      .sort(compareRegionThenName)
+  }
 
   const rosterRows = await db
     .select({
@@ -321,7 +354,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     summaryZh: buildSummaryZh(tournament),
     placements,
     participants,
-    rosters: Array.from(rosterMap.values()),
+    rosters: Array.from(rosterMap.values()).sort(compareRegionThenName),
   }
 }
 
@@ -479,7 +512,9 @@ export async function getChinaPerformance(tournamentId: string): Promise<ChinaPe
       summary:
         detail.status === 'cancelled'
           ? '该届赛事已取消，未产生中国战队成绩。'
-          : '本届无中国战队进入最终排名记录。',
+          : detail.status === 'ongoing'
+            ? '本届参赛名单已定，中国战队最终成绩待定。'
+            : '本届无中国战队进入最终排名记录。',
       teams: [],
     }
   }

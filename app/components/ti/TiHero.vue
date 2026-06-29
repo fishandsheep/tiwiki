@@ -15,6 +15,7 @@
 
       <div class="mt-4 flex max-w-full flex-col items-start gap-2 sm:flex-row sm:flex-wrap">
         <span v-if="t.status === 'cancelled'" class="chip">赛事取消</span>
+        <span v-else-if="t.status === 'ongoing'" class="chip chip-gold">参赛名单已定</span>
         <span class="chip"><Icon name="pin" :size="13" /> {{ t.city }} · {{ t.country }}</span>
         <span class="chip max-w-full min-w-0"><Icon name="building" :size="13" /> <span class="min-w-0 truncate">{{ t.venue }}</span></span>
         <span class="chip"><Icon name="calendar" :size="13" /> {{ formatDateRange(t.startDate, t.endDate, t.status) }}</span>

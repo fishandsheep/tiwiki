@@ -2,14 +2,59 @@
   <div class="card overflow-hidden">
     <div class="border-b border-edge px-3.5 py-2.5 lg:px-5 lg:py-4">
       <h3 class="text-base font-bold text-ink-main lg:text-lg">最终排名</h3>
-      <p class="text-xs text-ink-muted lg:text-sm">共 {{ placements.length }} 支队伍</p>
+      <p class="text-xs text-ink-muted lg:text-sm">{{ status === 'ongoing' ? `按赛区罗列 · 共 ${placements.length} 支队伍` : `共 ${placements.length} 支队伍` }}</p>
     </div>
 
     <div v-if="status === 'cancelled'" class="px-4 py-8 text-center text-sm text-ink-muted">
       该届赛事已取消，未产生最终排名。
     </div>
+    <template v-else-if="status === 'ongoing'">
+      <div class="divide-y divide-edge">
+        <section v-for="group in ongoingGroups" :key="group.region" class="px-3.5 py-3 lg:px-5 lg:py-4">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="chip chip-gold">{{ group.region }}</span>
+            <span class="text-xs text-ink-muted">{{ group.items.length }} 支队伍</span>
+          </div>
+          <div class="grid gap-2.5 lg:grid-cols-2">
+            <article
+              v-for="p in group.items"
+              :key="p.teamId"
+              class="rounded-xl border border-edge bg-bg-subtle/60 px-3 py-3"
+            >
+              <div class="flex min-w-0 items-start gap-2.5">
+                <span class="w-7 shrink-0 pt-1 text-center font-mono text-sm font-bold text-ink-muted">{{ displayRank(p.rank) }}</span>
+                <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-card">
+                  <img
+                    v-if="p.teamLogo"
+                    v-media-zoom="{ src: p.teamLogo, alt: `${p.teamName} logo`, caption: p.teamName, subcaption: p.region, kind: 'logo' }"
+                    :src="p.teamLogo"
+                    :alt="`${p.teamName} logo`"
+                    class="max-h-7 max-w-7 object-contain"
+                    loading="lazy"
+                  >
+                  <span v-else class="text-xs font-bold text-gold">{{ initials(p.teamName) }}</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    class="flex min-w-0 items-center text-left text-sm font-medium leading-5 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card"
+                    :class="p.isChinaTeam ? 'text-gold' : 'text-ink-main'"
+                    @click="emit('focus-team', p.teamId)"
+                  ><span class="truncate">{{ p.teamName }}</span></button>
+                  <div class="mt-0.5 flex flex-wrap items-center gap-1">
+                    <span class="text-xs text-ink-muted">{{ p.region || '赛区待补' }}</span>
+                    <span v-if="p.inviteType" class="chip text-[10px]">{{ p.inviteType }}</span>
+                  </div>
+                </div>
+                <span class="shrink-0 pt-1 text-right font-mono text-[11px] leading-5 text-ink-muted">—</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </template>
 
-    <template v-else>
+    <template v-else-if="placements.length">
       <div class="divide-y divide-edge sm:hidden">
         <article
           v-for="p in placements"
@@ -17,7 +62,7 @@
           class="px-3.5 py-2.5"
         >
           <div class="flex min-w-0 items-start gap-2.5">
-            <span class="w-7 shrink-0 pt-1 text-center font-mono text-sm font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
+            <span class="w-7 shrink-0 pt-1 text-center font-mono text-sm font-bold" :class="rankColor(p.rank)">{{ displayRank(p.rank) }}</span>
             <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-edge bg-bg-subtle">
               <img
                 v-if="p.teamLogo"
@@ -62,7 +107,7 @@
           <tbody class="divide-y divide-edge">
             <tr v-for="p in placements" :key="p.teamId + p.rank" class="transition-colors hover:bg-bg-subtle">
               <td class="px-4 py-3">
-                <span class="font-mono font-bold" :class="rankColor(p.rank)">{{ p.rank }}</span>
+                <span class="font-mono font-bold" :class="rankColor(p.rank)">{{ displayRank(p.rank) }}</span>
               </td>
               <td class="px-4 py-3">
                 <button
@@ -105,8 +150,17 @@
 import { formatUsd } from '~/composables/tiData'
 import type { Placement, TournamentStatus } from '~/types/ti'
 
-defineProps<{ placements: Placement[]; status?: TournamentStatus }>()
+const props = defineProps<{ placements: Placement[]; status?: TournamentStatus }>()
 const emit = defineEmits<{ 'focus-team': [teamId: string] }>()
+
+const ongoingGroups = computed(() => {
+  const groups = new Map<string, Placement[]>()
+  for (const placement of props.placements) {
+    const region = placement.region || '赛区待补'
+    groups.set(region, [...(groups.get(region) || []), placement])
+  }
+  return Array.from(groups.entries()).map(([region, items]) => ({ region, items }))
+})
 
 function rankColor(rank: number) {
   if (rank === 1) return 'text-gold'
@@ -117,6 +171,10 @@ function rankColor(rank: number) {
 
 function initials(value: string) {
   const cleaned = value.replace(/[^a-z0-9]/gi, '')
-  return cleaned.slice(0, 2).toUpperCase() || 'TI'
+  return cleaned.slice(0, 2).toUpperCase() || 'Ti'
+}
+
+function displayRank(rank: number) {
+  return props.status === 'ongoing' ? '-' : String(rank)
 }
 </script>

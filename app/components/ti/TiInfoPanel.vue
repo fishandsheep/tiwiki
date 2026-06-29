@@ -5,12 +5,14 @@
       <div class="border-b border-edge bg-gold/5 px-3.5 py-3 lg:p-5">
         <p class="text-xs uppercase tracking-wide text-gold lg:text-sm">冠军 · Champion</p>
         <button
+          v-if="t.championTeamId"
           type="button"
           class="mt-1 text-left text-[1.05rem] font-black leading-tight text-ink-main transition-colors hover:text-gold lg:text-xl"
           @click="emit('focus-team', t.championTeamId)"
         >
           {{ t.champion }}
         </button>
+        <p v-else class="mt-1 text-[1.05rem] font-black leading-tight text-ink-main lg:text-xl">{{ t.champion }}</p>
       </div>
       <!-- 亚军 -->
       <div class="border-b border-edge px-3.5 py-3 lg:p-5">
@@ -52,7 +54,7 @@ const rows = computed(() => [
   { label: '举办地', value: `${props.t.city}，${props.t.country}` },
   { label: '场馆', value: props.t.venue },
   { label: '时间', value: formatDateRange(props.t.startDate, props.t.endDate, props.t.status) },
-  { label: '状态', value: props.t.status === 'cancelled' ? '已取消' : '已完赛' },
+  { label: '状态', value: props.t.status === 'cancelled' ? '已取消' : props.t.status === 'ongoing' ? '进行中' : '已完赛' },
   { label: '英文页', value: props.t.liquipediaUrl ? 'Liquipedia' : '—', href: props.t.liquipediaUrl || '' },
 ])
 </script>

@@ -14,7 +14,7 @@ LIQUIPEDIA_API = "https://liquipedia.net/dota2/api.php"
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = "ti-wiki/1.0 (https://local.ti-wiki.invalid; zdx@local)"
 REQUEST_INTERVAL_SECONDS = 2.1
-YEARS = list(range(2011, 2026))
+YEARS = list(range(2011, 2027))
 
 COMMON_WORDS = {
     "team",

@@ -1,12 +1,12 @@
 import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
-// ===== TI 百科 DB schema (Drizzle / better-sqlite3) =====
+// ===== Ti 百科 DB schema (Drizzle / better-sqlite3) =====
 // 爬虫写事实字段;summaryZh/chinaSummary 为人工中文,爬虫不覆写。
 
 export const tournaments = sqliteTable('tournaments', {
   id: text('id').primaryKey(), // "ti6"
-  status: text('status').notNull().default('completed'), // completed | cancelled
+  status: text('status').notNull().default('completed'), // completed | ongoing | cancelled
   tiNo: integer('ti_no').notNull().unique(),
   name: text('name').notNull(),
   nameZh: text('name_zh'),

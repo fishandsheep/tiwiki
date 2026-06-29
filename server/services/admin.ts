@@ -90,7 +90,7 @@ const tableConfigs = {
     fields: [
       { name: 'id', label: 'ID', type: 'text', required: true, readonly: true },
       { name: 'status', label: '状态', type: 'select', required: true, defaultValue: 'completed' },
-      { name: 'ti_no', label: 'TI 编号', type: 'integer', required: true },
+      { name: 'ti_no', label: 'Ti 编号', type: 'integer', required: true },
       { name: 'name', label: '英文名', type: 'text', required: true },
       { name: 'name_zh', label: '中文名', type: 'text', nullable: true },
       { name: 'year', label: '年份', type: 'integer', required: true },
