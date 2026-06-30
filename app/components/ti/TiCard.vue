@@ -2,15 +2,16 @@
   <NuxtLink
     :to="`/ti/${tournament.routeId}`"
     class="card card-hover reveal block p-4 lg:p-5"
+    :class="{ 'ti-card-cancelled': tournament.status === 'cancelled' }"
   >
     <div class="flex items-baseline justify-between">
-      <span class="text-lg font-black text-gold lg:text-xl">
+      <span class="text-lg font-black text-gold lg:text-xl" :class="{ 'line-through decoration-2': tournament.status === 'cancelled' }">
         {{ tournament.status === 'cancelled' ? tournament.year : formatTiLabel(tournament.tiNo) }}
       </span>
-      <span class="text-xs text-ink-muted lg:text-sm">{{ tournament.year }}</span>
+      <span class="text-xs text-ink-muted lg:text-sm" :class="{ 'line-through': tournament.status === 'cancelled' }">{{ tournament.year }}</span>
     </div>
 
-    <p class="mt-0.5 truncate text-sm text-ink-muted lg:text-base">{{ tournament.nameZh }}</p>
+    <p class="mt-0.5 truncate text-sm text-ink-muted lg:text-base" :class="{ 'line-through': tournament.status === 'cancelled' }">{{ tournament.nameZh }}</p>
 
     <dl class="mt-3 space-y-1.5 text-sm lg:text-base">
       <div class="flex justify-between gap-2">

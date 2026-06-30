@@ -27,7 +27,7 @@ html {
 
 @media (min-width: 1024px) {
   html {
-    font-size: 18px;
+    font-size: 20px;
   }
 }
 
@@ -213,6 +213,12 @@ body {
   }
   .home-route-icon {
     @apply grid h-9 w-9 shrink-0 place-items-center text-gold;
+  }
+  .ti-card-cancelled {
+    @apply border-edge/55 bg-bg-card/45 opacity-55 grayscale;
+  }
+  .ti-card-cancelled:hover {
+    @apply border-edge;
   }
 
 }

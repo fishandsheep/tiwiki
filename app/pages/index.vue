@@ -82,7 +82,7 @@
           <h2 class="text-lg font-black text-ink-main sm:text-xl">30 秒读懂 Ti</h2>
           <div class="mt-2 max-w-[66ch] space-y-1 text-sm leading-7 text-ink-muted">
             <p>The International（简称 Ti）是 Valve 主办的 Dota 2 世界最高规格赛事，自 2011 年起举办。</p>
-            <p>这里按届次保留冠军、奖金池、队伍排名与中国战队最佳成绩，先给结论，再给完整数据。</p>
+            <p>Ti 的特殊性不只在冠军头衔：它长期用玩家购买 Compendium / Battle Pass 等内容反哺奖金池，非商业社区转播可基于 DotaTV 自制信号传播赛事，Valve 也持续把它塑造成玩家、选手与创作者围绕 Dota 聚到一起的年度现场。</p>
           </div>
         </div>
 
@@ -98,33 +98,12 @@
       </div>
     </section>
 
-    <!-- 核心入口 -->
-    <section class="mx-auto max-w-shell px-4 pb-4">
-      <div v-reveal class="reveal home-route-rail">
-        <NuxtLink
-          v-for="e in entries"
-          :key="e.to"
-          :to="e.to"
-          class="group home-route-link"
-        >
-          <span class="home-route-icon">
-            <Icon :name="e.icon" :size="22" />
-          </span>
-          <span class="min-w-0">
-            <span class="block text-sm font-bold text-ink-main">{{ e.label }}</span>
-            <span class="mt-0.5 block text-xs text-ink-muted">{{ e.desc }}</span>
-          </span>
-          <span class="ml-auto text-sm text-gold transition-transform group-hover:translate-x-1">→</span>
-        </NuxtLink>
-      </div>
-    </section>
-
     <!-- 历届赛事 -->
     <section class="mx-auto max-w-shell px-4 py-8">
       <SectionTitle title="历届赛事" to="/ti" />
       <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <TiCard
-          v-for="(t, i) in tournaments"
+          v-for="(t, i) in displayTournaments"
           :key="t.id"
           v-reveal
           :style="{ '--i': Math.min(i, 6) }"
@@ -142,6 +121,8 @@ import { formatUsd, formatTiLabel, placementLabel } from '~/composables/tiData'
 
 const { data: tournaments } = await useTournaments()
 const { data: stats } = await useStats()
+
+const displayTournaments = computed(() => tournaments.value.filter((t) => t.status !== 'cancelled'))
 
 const heroPointer = reactive({ x: 0, y: 0 })
 const heroMotionStyle = computed(() => ({
@@ -168,7 +149,7 @@ function resetHeroPointer() {
   heroPointer.y = 0
 }
 
-const featured = computed(() => tournaments.value[0] ?? null)
+const featured = computed(() => displayTournaments.value[0] ?? null)
 
 const latestChinaTag = computed(() => {
   if (!featured.value || featured.value.status !== 'completed') return ''
@@ -183,10 +164,4 @@ const statsCards = computed(() => [
   { label: '中国冠军', value: String(stats.value.chinaChampionsCount), suffix: '次' },
   { label: '最高奖金池', value: formatUsd(stats.value.maxPrizePool), sub: formatTiLabel(stats.value.maxPrizeTiNo) },
 ])
-
-const entries = [
-  { to: '/ti', label: '历届赛事', icon: 'trophy', desc: 'Ti1 到 Ti15 与 2020' },
-  { to: '/china', label: '中国战队', icon: 'pin', desc: '中国战队成绩' },
-  { to: '/rankings', label: '榜单', icon: 'chart', desc: '奖金池 / 冠军选手' },
-]
 </script>

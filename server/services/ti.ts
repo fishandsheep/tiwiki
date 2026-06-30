@@ -484,10 +484,11 @@ export async function getRankings(): Promise<RankingsData> {
 
 export async function getStats(): Promise<StatsData> {
   const tournaments = await listTournaments()
+  const officialTournaments = tournaments.filter((t) => t.status !== 'cancelled')
   const rankings = await getRankings()
   const max = [...rankings.prizePools].sort((a, b) => b.prizePoolUsd - a.prizePoolUsd)[0]
   return {
-    totalTIs: tournaments.length,
+    totalTIs: officialTournaments.length,
     championsCount: rankings.champions.length,
     chinaChampionsCount: rankings.champions.filter((row) => row.isChinaTeam).length,
     maxPrizePool: max?.prizePoolUsd || 0,

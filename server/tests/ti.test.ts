@@ -44,12 +44,13 @@ test('TI6 detail has placements and rosters', async () => {
 })
 
 test('rankings and stats return core aggregates', async () => {
+  const tournaments = await listTournaments()
   const rankings = await getRankings()
   const stats = await getStats()
   assert.ok(rankings.champions.length >= 14)
   assert.ok(rankings.playerChampions.length >= 1)
   assert.ok(rankings.prizePools.length >= 14)
-  assert.ok(stats.totalTIs >= 15)
+  assert.equal(stats.totalTIs, tournaments.filter((t) => t.status !== 'cancelled').length)
   assert.ok(stats.maxPrizePool > 0)
 })
 
