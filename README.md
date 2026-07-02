@@ -2,6 +2,11 @@
 
 中文 Dota2 Ti（The International）历届赛事资料站。Mobile First 自适应，深色电竞风。
 
+## 站点信息
+
+- GitHub 仓库：[fishandsheep/tiwiki](https://github.com/fishandsheep/tiwiki)
+- 工信部备案：[鲁ICP备2026035857号-1](https://beian.miit.gov.cn/#/Integrated/index)
+
 ## 技术栈
 
 - [Nuxt 4](https://nuxt.com) + Vue 3（`nuxt generate` 静态生成，`crawlLinks` 预渲染全部 `/ti/:id` 详情页）
