@@ -123,7 +123,7 @@ const tableConfigs = {
       { name: 'name_zh', label: '中文名', type: 'text', nullable: true },
       { name: 'region', label: '赛区', type: 'text', nullable: true },
       { name: 'country', label: '国家/地区', type: 'text', nullable: true },
-      { name: 'logo', label: 'Logo', type: 'url', defaultValue: '' },
+      { name: 'logo', label: 'Logo', type: 'text', defaultValue: '' },
       { name: 'logo_source_url', label: 'Logo 来源', type: 'url', defaultValue: '' },
       { name: 'description_zh', label: '中文描述', type: 'textarea', defaultValue: '' },
       { name: 'liquipedia_url', label: 'Liquipedia URL', type: 'url', nullable: true },

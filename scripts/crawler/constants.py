@@ -51,6 +51,16 @@ CHINA_TEAM_ALIASES = {
     "teamserenity",
     "cdecgaming",
     "cdc",
+    "tongfu",
+    "teamdk",
+    "dk",
+    "rattlesnake",
+    "rsnake",
+    "keengaming",
+    "vgjthunder",
+    "oknirvanacn",
+    "teamtidebound",
+    "yakutoubrothers",
 }
 
 

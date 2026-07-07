@@ -121,6 +121,8 @@ test('admin service lists table rows and metadata', () => {
   assert.ok(players)
   assert.ok(!players.fields.some((field) => field.name === 'homepage_url'))
   assert.equal(players.fields.find((field) => field.name === 'avatar')?.type, 'text')
+  const teams = meta.tables.find((table) => table.name === 'teams')
+  assert.equal(teams?.fields.find((field) => field.name === 'logo')?.type, 'text')
 
   const list = admin.listRows('teams', { search: 'Wings', pageSize: 10 })
   assert.equal(list.total, 1)
