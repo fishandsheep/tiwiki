@@ -16,7 +16,7 @@ export const tournaments = sqliteTable('tournaments', {
   country: text('country'),
   city: text('city'),
   venue: text('venue'),
-  prizePoolUsd: integer('prize_pool_usd').default(0),
+  prizePoolUsd: integer('prize_pool_usd'),
   championTeamId: text('champion_team_id'),
   runnerUpTeamId: text('runner_up_team_id'),
   // 人工中文原创,爬虫不覆写
@@ -53,6 +53,72 @@ export const players = sqliteTable('players', {
   liquipediaUrl: text('liquipedia_url'),
 })
 
+export const teamAliases = sqliteTable('team_aliases', {
+  alias: text('alias').primaryKey(),
+  teamId: text('team_id').notNull().references(() => teams.id),
+  source: text('source').notNull().default('curated'),
+})
+
+export const playerAliases = sqliteTable('player_aliases', {
+  alias: text('alias').primaryKey(),
+  playerId: text('player_id').notNull().references(() => players.id),
+  source: text('source').notNull().default('curated'),
+})
+
+export const fieldProvenance = sqliteTable(
+  'field_provenance',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    fieldName: text('field_name').notNull(),
+    sourceKind: text('source_kind').notNull(),
+    sourceUrl: text('source_url').notNull(),
+    sourceRevision: text('source_revision'),
+    fetchedAt: text('fetched_at'),
+    verificationStatus: text('verification_status').notNull().default('single-source'),
+    note: text('note').notNull().default(''),
+    valueJson: text('value_json'),
+    observedValueJson: text('observed_value_json'),
+  },
+  (t) => ({
+    uniqueSource: uniqueIndex('field_provenance_source_unique').on(
+      t.entityType,
+      t.entityId,
+      t.fieldName,
+      t.sourceKind,
+      t.sourceUrl,
+    ),
+  }),
+)
+
+export const fieldOverrides = sqliteTable(
+  'field_overrides',
+  {
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    fieldName: text('field_name').notNull(),
+    valueJson: text('value_json').notNull(),
+    reason: text('reason').notNull(),
+    sourceUrl: text('source_url').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => ({
+    uniqueField: uniqueIndex('field_overrides_field_unique').on(t.entityType, t.entityId, t.fieldName),
+  }),
+)
+
+export const mediaRights = sqliteTable('media_rights', {
+  assetPath: text('asset_path').primaryKey(),
+  filePageUrl: text('file_page_url'),
+  author: text('author'),
+  sourceUrl: text('source_url'),
+  license: text('license'),
+  permissionNote: text('permission_note'),
+  sourceRevision: text('source_revision'),
+  status: text('status').notNull().default('unverified'),
+})
+
 export const placements = sqliteTable(
   'placements',
   {
@@ -85,6 +151,7 @@ export const participants = sqliteTable(
     teamId: text('team_id')
       .notNull()
       .references(() => teams.id),
+    displayName: text('display_name'),
     region: text('region'),
     country: text('country'),
     inviteType: text('invite_type'), // 直接邀请 / xx区预选 / 外卡赛

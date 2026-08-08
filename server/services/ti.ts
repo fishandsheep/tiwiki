@@ -3,6 +3,7 @@ import { db, schema } from '../db/client'
 import type {
   ChinaAggregateRow,
   ChinaPerformance,
+  FieldProvenance,
   Participant,
   Placement,
   PlayerChampionRow,
@@ -13,7 +14,8 @@ import type {
   Tournament,
   TournamentDetail,
   TournamentSummary,
-} from '../../app/types/ti'
+} from '../../shared/types/ti'
+import { formatPrizePool } from '../../shared/ti-values'
 
 function routeIdFor(t: Pick<Tournament, 'status' | 'year' | 'tiNo'>) {
   return t.status === 'cancelled' ? String(t.year) : String(t.tiNo)
@@ -51,7 +53,7 @@ function buildSummaryZh(t: Tournament) {
   if (t.status === 'ongoing') {
     return `${tournamentLabel(t)} 将于 ${dateRangeText(t.startDate, t.endDate, t.status)} 在 ${t.city} ${t.venue} 举办，参赛名单已定，最终排名待定。`
   }
-  return `${tournamentLabel(t)} 于 ${dateRangeText(t.startDate, t.endDate, t.status)} 在 ${t.city} ${t.venue} 举办，冠军为 ${t.champion}，总奖金池 ${t.prizePoolUsd.toLocaleString('en-US')} 美元。`
+  return `${tournamentLabel(t)} 于 ${dateRangeText(t.startDate, t.endDate, t.status)} 在 ${t.city} ${t.venue} 举办，冠军为 ${t.champion}，总奖金池 ${formatPrizePool(t.prizePoolUsd, t.status)}。`
 }
 
 function placementLabel(rank: number): string {
@@ -128,18 +130,23 @@ function normalizeTournament(row: typeof schema.tournaments.$inferSelect): Tourn
     country: row.country || '',
     city: row.city || '',
     venue: row.venue || '',
-    prizePoolUsd: row.prizePoolUsd || 0,
-    champion: row.championTeamId ? '' : row.status === 'completed' ? '' : '—',
-    runnerUp: row.runnerUpTeamId ? '' : row.status === 'completed' ? '' : '—',
+    prizePoolUsd: row.prizePoolUsd ?? null,
+    champion: row.championTeamId ? '' : row.status === 'completed' ? '未知' : row.status === 'ongoing' ? '待定' : '不适用',
+    runnerUp: row.runnerUpTeamId ? '' : row.status === 'completed' ? '未知' : row.status === 'ongoing' ? '待定' : '不适用',
     championTeamId: row.championTeamId || '',
     runnerUpTeamId: row.runnerUpTeamId || '',
     summaryZh: row.summaryZh || '',
     chinaSummary: row.chinaSummary || '',
     liquipediaUrl: row.liquipediaUrl || '',
+    fetchedAt: row.fetchedAt || '',
+    verificationStatus: 'single-source',
+    provenance: [],
   }
 }
 
-async function enrichTournamentNames(rows: typeof schema.tournaments.$inferSelect[]) {
+async function enrichTournamentNames(
+  rows: typeof schema.tournaments.$inferSelect[],
+): Promise<Tournament[]> {
   const tournaments = rows.map(normalizeTournament)
   const teamIds = Array.from(
     new Set(
@@ -153,12 +160,52 @@ async function enrichTournamentNames(rows: typeof schema.tournaments.$inferSelec
         .where(inArray(schema.teams.id, teamIds))
     : []
   const teamMap = new Map(teams.map((t) => [t.id, t.name]))
+  const tournamentIds = tournaments.map((t) => t.id)
+  const provenanceRows = tournamentIds.length
+    ? await db
+        .select({
+          entityId: schema.fieldProvenance.entityId,
+          fieldName: schema.fieldProvenance.fieldName,
+          sourceKind: schema.fieldProvenance.sourceKind,
+          sourceUrl: schema.fieldProvenance.sourceUrl,
+          sourceRevision: schema.fieldProvenance.sourceRevision,
+          fetchedAt: schema.fieldProvenance.fetchedAt,
+          status: schema.fieldProvenance.verificationStatus,
+          note: schema.fieldProvenance.note,
+        })
+        .from(schema.fieldProvenance)
+        .where(and(
+          eq(schema.fieldProvenance.entityType, 'tournament'),
+          inArray(schema.fieldProvenance.entityId, tournamentIds),
+        ))
+    : []
+  const provenance = new Map<string, FieldProvenance[]>()
+  for (const row of provenanceRows) {
+    provenance.set(row.entityId, [...(provenance.get(row.entityId) || []), {
+      fieldName: row.fieldName,
+      sourceKind: row.sourceKind as FieldProvenance['sourceKind'],
+      sourceUrl: row.sourceUrl,
+      sourceRevision: row.sourceRevision || '',
+      fetchedAt: row.fetchedAt || '',
+      verificationStatus: row.status as FieldProvenance['verificationStatus'],
+      note: row.note,
+    }])
+  }
 
-  return tournaments.map((t) => ({
-    ...t,
-    champion: teamMap.get(t.championTeamId) || (t.status === 'completed' ? '' : '—'),
-    runnerUp: teamMap.get(t.runnerUpTeamId) || (t.status === 'completed' ? '' : '—'),
-  }))
+  return tournaments.map((t): Tournament => {
+    const sources = provenance.get(t.id) || []
+    return {
+      ...t,
+      champion: teamMap.get(t.championTeamId) || (t.status === 'completed' ? '未知' : t.status === 'ongoing' ? '待定' : '不适用'),
+      runnerUp: teamMap.get(t.runnerUpTeamId) || (t.status === 'completed' ? '未知' : t.status === 'ongoing' ? '待定' : '不适用'),
+      provenance: sources,
+      verificationStatus: sources.some((source) => source.verificationStatus === 'pending')
+        ? 'pending'
+        : sources.length && sources.every((source) => source.verificationStatus === 'verified')
+          ? 'verified'
+          : 'single-source',
+    }
+  })
 }
 
 export async function listTournaments(): Promise<TournamentSummary[]> {
@@ -213,11 +260,13 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
   if (!row) return null
 
   const [tournament] = await enrichTournamentNames([row])
+  if (!tournament) return null
 
   const participantRows = await db
     .select({
       tournamentId: schema.participants.tournamentId,
       teamId: schema.participants.teamId,
+      displayName: schema.participants.displayName,
       teamName: schema.teams.name,
       teamLogo: schema.teams.logo,
       teamLiquipediaUrl: schema.teams.liquipediaUrl,
@@ -234,7 +283,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
   const participants: Participant[] = participantRows.map((row) => ({
     tournamentId: row.tournamentId,
     teamId: row.teamId,
-    teamName: row.teamName,
+    teamName: row.displayName || row.teamName,
     teamLogo: row.teamLogo || '',
     teamLiquipediaUrl: row.teamLiquipediaUrl || '',
     region: translateRegion(row.region || row.teamRegion || ''),
@@ -249,6 +298,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       tournamentId: schema.placements.tournamentId,
       rank: schema.placements.rank,
       teamId: schema.placements.teamId,
+      displayName: schema.participants.displayName,
       teamName: schema.teams.name,
       teamLogo: schema.teams.logo,
       teamLiquipediaUrl: schema.teams.liquipediaUrl,
@@ -271,7 +321,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
     tournamentId: row.tournamentId,
     rank: row.rank,
     teamId: row.teamId,
-    teamName: row.teamName,
+    teamName: row.displayName || row.teamName,
     teamLogo: row.teamLogo || participantMap.get(row.teamId)?.teamLogo || '',
     teamLiquipediaUrl: row.teamLiquipediaUrl || participantMap.get(row.teamId)?.teamLiquipediaUrl || '',
     prizeUsd: row.prizeUsd || 0,
@@ -330,7 +380,7 @@ export async function getTournamentDetail(idOrNo: string): Promise<TournamentDet
       const participant = participantMap.get(row.teamId)
       rosterMap.set(row.teamId, {
         teamId: row.teamId,
-        teamName: row.teamName,
+        teamName: participant?.teamName || row.teamName,
         inviteType: participant?.inviteType || '',
         region: participant?.region || '',
         teamLogo: row.teamLogo || participant?.teamLogo || '',
@@ -396,6 +446,7 @@ export async function getRankings(): Promise<RankingsData> {
       prizePoolUsd: t.prizePoolUsd,
       routeId: t.routeId,
     }))
+    .filter((row): row is typeof row & { prizePoolUsd: number } => row.prizePoolUsd != null)
     .sort((a, b) => b.prizePoolUsd - a.prizePoolUsd)
 
   const chinaTeams: ChinaAggregateRow[] = tournaments
@@ -520,7 +571,7 @@ export async function getChinaPerformance(tournamentId: string): Promise<ChinaPe
     }
   }
 
-  const best = chinaPlacements[0]
+  const best = chinaPlacements[0]!
   return {
     tournamentId: detail.id,
     tiNo: detail.tiNo,

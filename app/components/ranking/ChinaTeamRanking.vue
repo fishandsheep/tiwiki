@@ -22,7 +22,6 @@ defineProps<{ chinaTeams: ChinaAggregateRow[] }>()
 
 function chipClass(rank: number) {
   if (rank === 1) return 'chip-gold'
-  if (rank === 2) return 'chip-red'
   return ''
 }
 </script>

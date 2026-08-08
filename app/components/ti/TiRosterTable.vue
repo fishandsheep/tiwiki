@@ -12,6 +12,8 @@
         :id="`roster-${team.teamId}`"
         v-for="team in rosters"
         :key="team.teamId"
+        tabindex="-1"
+        :aria-label="`${team.teamName} 参赛阵容`"
         class="relative scroll-mt-24 px-3.5 py-3.5 transition-colors duration-500 lg:px-5 lg:py-5"
         :class="activeTeamId === team.teamId ? 'bg-gold/10' : ''"
       >

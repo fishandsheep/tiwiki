@@ -16,7 +16,7 @@
     <dl class="mt-3 space-y-1.5 text-sm lg:text-base">
       <div class="flex justify-between gap-2">
         <dt class="shrink-0 text-ink-muted">{{ tournament.status === 'ongoing' ? '状态' : '冠军' }}</dt>
-        <dd class="min-w-0 truncate text-right font-medium text-ink-main">{{ tournament.champion }}</dd>
+        <dd class="min-w-0 truncate text-right font-medium text-ink-main">{{ tournament.status === 'ongoing' ? '进行中' : tournament.champion }}</dd>
       </div>
       <div class="flex justify-between gap-2">
         <dt class="shrink-0 text-ink-muted">亚军</dt>
@@ -24,7 +24,7 @@
       </div>
       <div class="flex justify-between gap-2">
         <dt class="text-ink-muted">奖金池</dt>
-        <dd class="font-mono text-xs text-ink-main lg:text-sm">{{ formatUsd(tournament.prizePoolUsd) }}</dd>
+        <dd class="font-mono text-xs text-ink-main lg:text-sm">{{ formatUsd(tournament.prizePoolUsd, tournament.status) }}</dd>
       </div>
     </dl>
 

@@ -446,7 +446,7 @@ def parse_placements_from_html(html: str, teams: dict[str, dict[str, Any]], part
     candidates = []
     for candidate in soup.select(".prizepooltable-placement"):
         header = candidate.select_one(".prizepooltable-header")
-        rows = candidate.select(".csstable-widget-row")
+        rows = candidate.select(".csstable-widget-row, tr.table2__row--body")
         header_text = header.get_text(" ", strip=True) if header else ""
         if "Participant" not in header_text or "Place" not in header_text:
             continue
@@ -458,11 +458,65 @@ def parse_placements_from_html(html: str, teams: dict[str, dict[str, Any]], part
 
     team_map = {participant["team_id"]: participant for participant in participants}
     name_map: dict[str, str] = {}
+    exact_name_map: dict[str, str] = {}
     for team_id, team in teams.items():
+        for exact in (team_id, team["name"], team.get("name_zh", "")):
+            if compact(exact):
+                exact_name_map[compact(exact)] = team_id
         for alias in team_aliases(team["name"], team_id, team["name_zh"]):
-            name_map[alias] = team_id
+            name_map.setdefault(alias, team_id)
 
     placements: list[dict[str, Any]] = []
+    def add_placement(team_name: str, rank: int, prize_usd: int) -> None:
+        team_key = compact(team_name)
+        team_id = exact_name_map.get(team_key) or name_map.get(team_key) or match_existing_team_id(team_name, teams)
+        if not team_id:
+            team_id, seed = resolve_team(team_name, seed_teams)
+            if team_id not in teams:
+                teams[team_id] = {
+                    "id": team_id,
+                    "name": team_name,
+                    "name_zh": seed.name_zh if seed and seed.name_zh else team_name,
+                    "region": seed.region if seed and seed.region else "",
+                    "country": seed.country if seed and seed.country else "",
+                    "logo": "",
+                    "logo_source_url": "",
+                    "description_zh": seed.description_zh if seed else "",
+                    "liquipedia_url": f"https://liquipedia.net/dota2/{team_name.replace(' ', '_')}",
+                }
+        participant = team_map.get(team_id)
+        placements.append(
+            {
+                "team_id": team_id,
+                "team_name": team_name,
+                "rank": rank,
+                "prize_usd": prize_usd,
+                "is_china_team": is_china_team(team_id, team_name, participant["region"] if participant else teams[team_id]["region"]),
+            }
+        )
+
+    modern_rows = table.select("tr.table2__row--body")
+    if modern_rows:
+        current_rank = 0
+        for row in modern_rows:
+            place = row.select_one(".prizepooltable-place")
+            place_text = place.get_text(" ", strip=True) if place else ""
+            rank_match = re.search(r"\d+", place_text)
+            if rank_match:
+                current_rank = int(rank_match.group())
+            if not current_rank:
+                continue
+            team_names = [
+                anchor.get("title", "").strip()
+                for anchor in row.select(".prizepooltable-col-team .block-team .name a")
+                if anchor.get("title")
+            ]
+            prize_cell = row.select_one("td[data-align='right']")
+            prize_usd = parse_number(prize_cell.get_text(" ", strip=True)) if prize_cell else 0
+            for team_name in team_names:
+                add_placement(team_name, current_rank, prize_usd)
+        return placements
+
     for row in table.select(".csstable-widget-row"):
         cells = row.select(".csstable-widget-cell")
         if len(cells) < 4:
@@ -486,32 +540,7 @@ def parse_placements_from_html(html: str, teams: dict[str, dict[str, Any]], part
             if fallback_name and fallback_name != "Participant":
                 team_names.append(fallback_name)
         for team_name in team_names:
-            team_key = compact(team_name)
-            team_id = name_map.get(team_key) or match_existing_team_id(team_name, teams)
-            if not team_id:
-                team_id, seed = resolve_team(team_name, seed_teams)
-                if team_id not in teams:
-                    teams[team_id] = {
-                        "id": team_id,
-                        "name": team_name,
-                        "name_zh": seed.name_zh if seed and seed.name_zh else team_name,
-                        "region": seed.region if seed and seed.region else "",
-                        "country": seed.country if seed and seed.country else "",
-                        "logo": "",
-                        "logo_source_url": "",
-                        "description_zh": seed.description_zh if seed else "",
-                        "liquipedia_url": f"https://liquipedia.net/dota2/{team_name.replace(' ', '_')}",
-                    }
-            participant = team_map.get(team_id)
-            placements.append(
-                {
-                    "team_id": team_id,
-                    "team_name": team_name,
-                    "rank": rank,
-                    "prize_usd": prize_usd,
-                    "is_china_team": is_china_team(team_id, team_name, participant["region"] if participant else teams[team_id]["region"]),
-                }
-            )
+            add_placement(team_name, rank, prize_usd)
     return placements
 
 

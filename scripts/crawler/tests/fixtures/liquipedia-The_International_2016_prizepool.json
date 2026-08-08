@@ -1,0 +1,23 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "pages": [
+      {
+        "pageid": 43445,
+        "ns": 0,
+        "title": "The International/2016/prizepool",
+        "revisions": [
+          {
+            "slots": {
+              "main": {
+                "contentmodel": "wikitext",
+                "contentformat": "text/x-wiki",
+                "content": "20,770,460"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

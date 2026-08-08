@@ -1,4 +1,5 @@
 import type { Tournament } from '~/types/ti'
+import { formatPrizePool } from '~~/shared/ti-values'
 
 export function placementLabel(rank: number): string {
   switch (rank) {
@@ -15,8 +16,8 @@ export function placementLabel(rank: number): string {
   }
 }
 
-export function formatUsd(amount: number): string {
-  return '$' + amount.toLocaleString('en-US')
+export function formatUsd(amount: number | null, status: Tournament['status'] = 'completed'): string {
+  return formatPrizePool(amount, status)
 }
 
 export function formatDate(iso: string): string {

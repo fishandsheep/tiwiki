@@ -19,7 +19,7 @@
         <span class="chip"><Icon name="pin" :size="13" /> {{ t.city }} · {{ t.country }}</span>
         <span class="chip max-w-full min-w-0"><Icon name="building" :size="13" /> <span class="min-w-0 truncate">{{ t.venue }}</span></span>
         <span class="chip"><Icon name="calendar" :size="13" /> {{ formatDateRange(t.startDate, t.endDate, t.status) }}</span>
-        <span class="chip chip-gold"><Icon name="dollar" :size="13" /> {{ formatUsd(t.prizePoolUsd) }}</span>
+        <span class="chip chip-gold"><Icon name="dollar" :size="13" /> {{ formatUsd(t.prizePoolUsd, t.status) }}</span>
       </div>
     </div>
   </section>

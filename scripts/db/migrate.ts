@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
 import { dirname, resolve } from 'node:path'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync } from 'node:fs'
 
-const dbPath = resolve(process.cwd(), 'data/ti.db')
+const dbPath = resolve(process.env.TIWIKI_DB_PATH || process.argv[2] || resolve(process.cwd(), 'data/ti.db'))
 mkdirSync(dirname(dbPath), { recursive: true })
 
 const db = new Database(dbPath)
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
   country TEXT,
   city TEXT,
   venue TEXT,
-  prize_pool_usd INTEGER DEFAULT 0,
+  prize_pool_usd INTEGER,
   champion_team_id TEXT,
   runner_up_team_id TEXT,
   summary_zh TEXT DEFAULT '',
@@ -242,6 +242,26 @@ db.transaction(() => {
   dropLegacyParticipantMediaColumns()
   dropLegacyRosterMediaColumns()
 })()
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS schema_migrations (
+    version TEXT PRIMARY KEY NOT NULL,
+    applied_at TEXT NOT NULL
+  );
+`)
+
+const migrationsDir = resolve(process.cwd(), 'drizzle')
+const applied = db.prepare('SELECT 1 FROM schema_migrations WHERE version = ?')
+const record = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
+for (const version of readdirSync(migrationsDir).filter((name) => name.endsWith('.sql')).sort()) {
+  if (applied.get(version)) continue
+  const sql = readFileSync(resolve(migrationsDir, version), 'utf8')
+  db.transaction(() => {
+    db.exec(sql)
+    record.run(version, new Date().toISOString())
+  })()
+  console.log(`applied ${version}`)
+}
 
 db.close()
 console.log(`migrated ${dbPath}`)

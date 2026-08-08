@@ -34,5 +34,6 @@ const links = [
   { to: '/ti', label: '历届赛事' },
   { to: '/china', label: '中国战队' },
   { to: '/rankings', label: '榜单' },
+  { to: '/search', label: '搜索' },
 ]
 </script>

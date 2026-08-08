@@ -2,7 +2,7 @@
   <footer class="mt-16 border-t border-edge py-8 text-xs text-ink-muted">
     <div class="mx-auto flex max-w-shell flex-col items-center gap-3 px-4 text-center">
       <p><span class="ti-wordmark text-sm">Ti</span> 百科 · Dota2 国际邀请赛中文资料库</p>
-      <p>数据由公开赛事记录整理并人工校对，异常年份与缺失项会在对应页面标注。</p>
+      <p>数据由公开赛事记录整理并人工校对；本站非 Valve 官方，相关商标归各自权利人。</p>
 
       <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
         <a
@@ -26,6 +26,7 @@
           </svg>
           <span>GitHub</span>
         </a>
+        <NuxtLink to="/about" class="inline-flex min-h-8 items-center transition-colors hover:text-gold">来源与许可</NuxtLink>
         <a
           href="https://beian.miit.gov.cn/#/Integrated/index"
           target="_blank"

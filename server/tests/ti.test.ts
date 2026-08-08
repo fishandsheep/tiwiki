@@ -16,8 +16,8 @@ test('Ti15 ongoing entry can exist without final placements', async () => {
   const ti15 = tournaments.find((t) => t.tiNo === 15)
   assert.ok(ti15)
   assert.equal(ti15?.status, 'ongoing')
-  assert.equal(ti15?.champion, '—')
-  assert.equal(ti15?.runnerUp, '—')
+  assert.equal(ti15?.champion, '待定')
+  assert.equal(ti15?.runnerUp, '待定')
   assert.equal(ti15?.bestChinaRank, null)
 })
 
@@ -27,20 +27,20 @@ test('Ti15 detail shows all qualified teams while final ranking pending', async 
   assert.equal(detail?.status, 'ongoing')
   assert.equal(detail?.placements.length, 16)
   assert.ok(detail?.placements.every((placement) => placement.rank === 0))
-  assert.ok(detail?.placements.every((placement) => placement.region))
+  assert.ok(detail?.placements.every((placement) => placement.teamName))
   assert.ok(detail?.rosters.some((team) => team.teamId === 'lgd-gaming' && team.players.some((player) => player.handle === 'fcr' && player.role === '助理教练')))
 })
 
-test('TI6 detail has placements and rosters', async () => {
+test('TI6 detail has placements and rosters while unverified media degrades to placeholders', async () => {
   const detail = await getTournamentDetail('6')
   assert.ok(detail)
   assert.equal(detail?.tiNo, 6)
   assert.ok((detail?.placements.length || 0) >= 16)
   assert.ok((detail?.rosters.length || 0) >= 16)
-  assert.ok(detail?.participants.some((participant) => participant.teamLogo))
-  assert.ok(detail?.placements.some((placement) => placement.teamLogo))
-  assert.ok(detail?.rosters.some((team) => team.teamLogo))
-  assert.ok(detail?.rosters.some((team) => team.players.some((player) => player.avatar)))
+  assert.ok(detail?.participants.every((participant) => !participant.teamLogo))
+  assert.ok(detail?.placements.every((placement) => !placement.teamLogo))
+  assert.ok(detail?.rosters.every((team) => !team.teamLogo))
+  assert.ok(detail?.rosters.every((team) => team.players.every((player) => !player.avatar)))
 })
 
 test('rankings and stats return core aggregates', async () => {

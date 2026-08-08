@@ -2,32 +2,48 @@
   "name": "ti-wiki",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "overrides": {
+    "replace-in-file": {
+      "brace-expansion": "1.1.18"
+    }
+  },
   "scripts": {
-    "build": "nuxt build",
+    "build": "npm run generate",
+    "data:audit": "tsx scripts/db/audit.ts",
+    "data:report": "tsx scripts/report-data-refresh.ts",
     "db:migrate": "tsx scripts/db/migrate.ts",
-    "db:refresh": ".venv/bin/python3 scripts/crawler/refresh.py",
+    "db:refresh": ".venv/bin/python3 -u scripts/crawler/refresh.py",
     "db:refresh-player-avatars": "tsx scripts/refresh-player-avatars.ts",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host 127.0.0.1",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "npm run test:server && npm run test:crawler",
     "test:crawler": ".venv/bin/python3 -m unittest discover -s scripts/crawler/tests -p 'test_*.py'",
-    "test:server": "tsx --test server/tests/**/*.test.ts"
+    "test:e2e": "playwright test",
+    "test:server": "tsx --test server/tests/**/*.test.ts",
+    "typecheck": "nuxt typecheck",
+    "verify:static": "tsx scripts/verify-static-output.ts"
   },
   "dependencies": {
-    "@fontsource/cormorant-garamond": "^5.2.11",
-    "@vercel/speed-insights": "^2.0.0",
-    "better-sqlite3": "^12.10.1",
-    "drizzle-orm": "^0.45.2",
-    "nuxt": "^4.4.8",
-    "vue": "^3.5.35",
-    "vue-router": "^5.1.0"
+    "@fontsource/cormorant-garamond": "5.2.11",
+    "@vercel/speed-insights": "2.0.0",
+    "better-sqlite3": "12.11.1",
+    "drizzle-orm": "0.45.2",
+    "nuxt": "4.5.2",
+    "vue": "3.5.41",
+    "vue-router": "5.2.0"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.14.0",
-    "@types/better-sqlite3": "^7.6.13",
-    "drizzle-kit": "^0.31.10",
-    "tsx": "^4.20.3"
+    "@nuxtjs/tailwindcss": "6.14.0",
+    "@playwright/test": "1.62.1",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "22.20.1",
+    "tsx": "4.22.4",
+    "typescript": "5.9.3",
+    "vue-tsc": "3.3.9"
   }
 }

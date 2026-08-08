@@ -1,14 +1,28 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV === 'development' },
 
   modules: ['@nuxtjs/tailwindcss','@vercel/speed-insights/nuxt'],
 
-  css: ['~/assets/css/main.css'],
+  css: ['@fontsource/cormorant-garamond/700.css', '~/assets/css/main.css'],
 
   // Flat component names: <AppHeader/> not <LayoutAppHeader/>, <TiCard/> not <TiTiCard/>
   components: [{ path: '~/components', pathPrefix: false }],
+
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://tiwiki.vercel.app',
+    },
+  },
+
+  hooks: {
+    'pages:extend'(pages) {
+      if (process.env.NODE_ENV !== 'production') return
+      const adminIndex = pages.findIndex((page) => page.path === '/admin')
+      if (adminIndex !== -1) pages.splice(adminIndex, 1)
+    },
+  },
 
   app: {
     // Subtle route crossfade (brand register: motion as voice, not noise).
@@ -38,7 +52,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: ['/', '/ti', '/china', '/rankings'],
+      routes: ['/', '/ti', '/china', '/rankings', '/search', '/about', '/sitemap.xml', '/search-index.json'],
       ignore: ['/admin'],
     },
   },

@@ -1,0 +1,261 @@
+{
+  "generatedAt": "2026-08-07T18:51:17.049Z",
+  "refresh": {
+    "completedAt": "2026-08-07T18:51:01.071556+00:00",
+    "sourceRevision": "2403657,2403649,2406231,2406232,2406233,2406234,2407505,2406236,2408858,cancelled,2408726,2408039,2408435,2409014,2410013,2411048",
+    "parserVersion": "crawler-v2",
+    "manifest": {
+      "revisions": {
+        "2011": "2403657",
+        "2012": "2403649",
+        "2013": "2406231",
+        "2014": "2406232",
+        "2015": "2406233",
+        "2016": "2406234",
+        "2017": "2407505",
+        "2018": "2406236",
+        "2019": "2408858",
+        "2020": "cancelled",
+        "2021": "2408726",
+        "2022": "2408039",
+        "2023": "2408435",
+        "2024": "2409014",
+        "2025": "2410013",
+        "2026": "2411048"
+      },
+      "tournaments": 16,
+      "years": [
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ]
+    }
+  },
+  "changes": [
+    {
+      "tournamentId": "ti2020-cancelled",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:41.758554+00:00",
+      "after": "2026-08-07T18:50:58.487803+00:00"
+    },
+    {
+      "tournamentId": "ti1",
+      "field": "country",
+      "before": "Germany",
+      "after": "德国"
+    },
+    {
+      "tournamentId": "ti1",
+      "field": "city",
+      "before": "Cologne",
+      "after": "科隆"
+    },
+    {
+      "tournamentId": "ti1",
+      "field": "venue",
+      "before": "Koelnmesse",
+      "after": "Gamescom"
+    },
+    {
+      "tournamentId": "ti1",
+      "field": "prize_pool_usd",
+      "before": 0,
+      "after": 1600000
+    },
+    {
+      "tournamentId": "ti1",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:23.793334+00:00",
+      "after": "2026-08-07T18:35:06.287736+00:00"
+    },
+    {
+      "tournamentId": "ti2",
+      "field": "prize_pool_usd",
+      "before": 0,
+      "after": 1600000
+    },
+    {
+      "tournamentId": "ti2",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:25.488155+00:00",
+      "after": "2026-08-07T18:35:11.205531+00:00"
+    },
+    {
+      "tournamentId": "ti3",
+      "field": "venue",
+      "before": "",
+      "after": "Benaroya Hall"
+    },
+    {
+      "tournamentId": "ti3",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:27.312948+00:00",
+      "after": "2026-08-07T18:35:41.629522+00:00"
+    },
+    {
+      "tournamentId": "ti4",
+      "field": "venue",
+      "before": "",
+      "after": "KeyArena"
+    },
+    {
+      "tournamentId": "ti4",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:29.556071+00:00",
+      "after": "2026-08-07T18:36:13.303538+00:00"
+    },
+    {
+      "tournamentId": "ti5",
+      "field": "venue",
+      "before": "",
+      "after": "KeyArena"
+    },
+    {
+      "tournamentId": "ti5",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:31.680472+00:00",
+      "after": "2026-08-07T18:36:44.898801+00:00"
+    },
+    {
+      "tournamentId": "ti6",
+      "field": "start_date",
+      "before": "2016-08-02",
+      "after": "2016-08-03"
+    },
+    {
+      "tournamentId": "ti6",
+      "field": "country",
+      "before": "United States",
+      "after": "美国"
+    },
+    {
+      "tournamentId": "ti6",
+      "field": "city",
+      "before": "Seattle",
+      "after": "西雅图"
+    },
+    {
+      "tournamentId": "ti6",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:33.898979+00:00",
+      "after": "2026-08-07T18:37:16.593897+00:00"
+    },
+    {
+      "tournamentId": "ti7",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:36.707121+00:00",
+      "after": "2026-08-07T18:37:48.145980+00:00"
+    },
+    {
+      "tournamentId": "ti8",
+      "field": "country",
+      "before": "Canada",
+      "after": "加拿大"
+    },
+    {
+      "tournamentId": "ti8",
+      "field": "city",
+      "before": "Vancouver",
+      "after": "温哥华"
+    },
+    {
+      "tournamentId": "ti8",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:39.148461+00:00",
+      "after": "2026-08-07T18:38:19.894972+00:00"
+    },
+    {
+      "tournamentId": "ti9",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:41.751901+00:00",
+      "after": "2026-08-07T18:38:52.086405+00:00"
+    },
+    {
+      "tournamentId": "ti10",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:44.558571+00:00",
+      "after": "2026-08-07T18:39:24.228823+00:00"
+    },
+    {
+      "tournamentId": "ti11",
+      "field": "venue",
+      "before": "",
+      "after": "Suntec Singapore"
+    },
+    {
+      "tournamentId": "ti11",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:47.884686+00:00",
+      "after": "2026-08-07T18:39:56.502632+00:00"
+    },
+    {
+      "tournamentId": "ti12",
+      "field": "venue",
+      "before": "",
+      "after": "Seattle Convention Center’s Summit"
+    },
+    {
+      "tournamentId": "ti12",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:50.749990+00:00",
+      "after": "2026-08-07T18:40:28.264459+00:00"
+    },
+    {
+      "tournamentId": "ti13",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:46:53.235341+00:00",
+      "after": "2026-08-07T18:40:59.905883+00:00"
+    },
+    {
+      "tournamentId": "ti14",
+      "field": "venue",
+      "before": "",
+      "after": "Barclays Arena"
+    },
+    {
+      "tournamentId": "ti14",
+      "field": "fetched_at",
+      "before": "2026-06-16T12:40:31.101493+00:00",
+      "after": "2026-08-07T18:41:31.970663+00:00"
+    },
+    {
+      "tournamentId": "ti15",
+      "field": "prize_pool_usd",
+      "before": 1600000,
+      "after": 2648072
+    },
+    {
+      "tournamentId": "ti15",
+      "field": "fetched_at",
+      "before": "2026-06-29T14:20:41.252468+00:00",
+      "after": "2026-08-07T18:16:16.274369+00:00"
+    }
+  ],
+  "audit": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "entityMappings": {
+    "teamAliases": 4,
+    "playerAliases": 0,
+    "teamLineage": 0
+  },
+  "media": {
+    "verified": 0,
+    "quarantined": 583
+  }
+}

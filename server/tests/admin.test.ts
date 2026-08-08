@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import Database from 'better-sqlite3'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -126,7 +126,7 @@ test('admin service lists table rows and metadata', () => {
 
   const list = admin.listRows('teams', { search: 'Wings', pageSize: 10 })
   assert.equal(list.total, 1)
-  assert.equal(list.rows[0].id, 'wings')
+  assert.equal(list.rows[0]?.id, 'wings')
   db.close()
 })
 
@@ -170,11 +170,29 @@ test('admin service reports avatar source network failures as validation errors'
   }
 })
 
+test('admin service rejects local avatar files outside the import directory', async () => {
+  const db = createTestDb()
+  const admin = createAdminService(db)
+  const tempDir = mkdtempSync(join(tmpdir(), 'tiwiki-avatar-outside-'))
+  const avatarPath = join(tempDir, 'avatar.png')
+  writeFileSync(avatarPath, 'not published')
+  try {
+    await assert.rejects(
+      () => admin.updateRow('players', 'shadow', { avatar_source_url: pathToFileURL(avatarPath).toString() }),
+      (error: unknown) => error instanceof AdminValidationError && error.message.includes('专用导入目录'),
+    )
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true })
+    db.close()
+  }
+})
+
 test('admin service keeps original avatar format for local file sources', async () => {
   const db = createTestDb()
   const admin = createAdminService(db)
-  const tempDir = mkdtempSync(join(tmpdir(), 'tiwiki-avatar-test-'))
   const originalCwd = process.cwd()
+  mkdirSync(resolve(originalCwd, 'data/import-media'), { recursive: true })
+  const tempDir = mkdtempSync(resolve(originalCwd, 'data/import-media/avatar-test-'))
   const playerId = 'avatar-test-fixture'
   const pngPath = join(tempDir, 'avatar.png')
   const pngBytes = Buffer.from(
@@ -188,17 +206,17 @@ test('admin service keeps original avatar format for local file sources', async 
   try {
     const updated = await admin.updateRow('players', playerId, { avatar_source_url: pathToFileURL(pngPath).toString() })
     assert.equal(updated?.avatar_source_url, pathToFileURL(pngPath).toString())
-    assert.match(String(updated?.avatar), /^\/media\/liquipedia\/players\/avatar-test-fixture\.(png|apng)$/)
+    assert.equal(updated?.avatar, '')
   } finally {
     process.chdir(originalCwd)
     rmSync(tempDir, { recursive: true, force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.png'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.apng'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.jpg'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.jpeg'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.webp'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.gif'), { force: true })
-    rmSync(resolve(originalCwd, 'public/media/liquipedia/players/avatar-test-fixture.svg'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.png'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.apng'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.jpg'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.jpeg'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.webp'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.gif'), { force: true })
+    rmSync(resolve(originalCwd, 'data/media-review/players/avatar-test-fixture.svg'), { force: true })
     db.close()
   }
 })
@@ -206,8 +224,9 @@ test('admin service keeps original avatar format for local file sources', async 
 test('admin service writes jpeg avatars with high-quality encoding', async () => {
   const db = createTestDb()
   const admin = createAdminService(db)
-  const tempDir = mkdtempSync(join(tmpdir(), 'tiwiki-avatar-jpeg-test-'))
   const originalCwd = process.cwd()
+  mkdirSync(resolve(originalCwd, 'data/import-media'), { recursive: true })
+  const tempDir = mkdtempSync(resolve(originalCwd, 'data/import-media/avatar-jpeg-test-'))
   const playerId = 'avatar-jpeg-fixture'
   const jpegPath = join(tempDir, 'avatar.jpg')
   const jpegBytes = Buffer.from(
@@ -216,11 +235,11 @@ test('admin service writes jpeg avatars with high-quality encoding', async () =>
   )
   writeFileSync(jpegPath, jpegBytes)
   db.prepare('insert into players (id, handle, country) values (?, ?, ?)').run(playerId, 'JPEG Fixture', 'CN')
-  const outputPath = resolve(originalCwd, `public/media/liquipedia/players/${playerId}.jpg`)
+  const outputPath = resolve(originalCwd, `data/media-review/players/${playerId}.jpg`)
 
   try {
     const updated = await admin.updateRow('players', playerId, { avatar_source_url: pathToFileURL(jpegPath).toString() })
-    assert.equal(updated?.avatar, `/media/liquipedia/players/${playerId}.jpg`)
+    assert.equal(updated?.avatar, '')
     const info = readFileSync(outputPath)
     assert.ok(info.length > 0)
   } finally {

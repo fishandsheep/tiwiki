@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path'
 import { mkdirSync } from 'node:fs'
 
 // Single DB file at repo root /data/ti.db (committed for reproducible builds).
-const DB_PATH = resolve(process.cwd(), 'data/ti.db')
+const DB_PATH = resolve(process.env.TIWIKI_DB_PATH || resolve(process.cwd(), 'data/ti.db'))
 mkdirSync(dirname(DB_PATH), { recursive: true })
 
 const sqlite = new Database(DB_PATH)

@@ -13,7 +13,7 @@
 - [Tailwind CSS](https://tailwindcss.com)（via `@nuxtjs/tailwindcss`）
 - [Drizzle ORM](https://orm.drizzle.team) + [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)，数据存于 `data/ti.db`（随仓库提交，构建可复现）
 - [Nitro](https://nitro.unjs.io) server routes（`server/api/*`）：构建期被预渲染调用以取数，结果烘焙进静态 HTML
-- Python 爬虫（`scripts/crawler`）：从 Liquipedia 抓事实数据，**仅本地运行**，写回 `data/ti.db`
+- Python 爬虫（`scripts/crawler`）：从 Liquipedia 抓事实数据，先写临时库并审计，成功后原子替换 `data/ti.db`
 - TypeScript，部署目标：Vercel（见下文「部署 Vercel」）
 
 ## 目录
@@ -23,7 +23,7 @@ app/
 ├── components/        # layout / Ti/ ranking，扁平命名（<TiCard/> 非 <TiTiCard/>）
 ├── composables/       # 数据 join 层（useTournaments/useTournament/useRankings/useChinaPerformance/tiData）
 ├── pages/             # index, ti/index, ti/[id], china, rankings
-├── types/ti.ts        # 数据模型 TS 接口
+├── types/ti.ts        # shared 类型兼容导出
 └── assets/css/main.css # token + 组件类
 
 server/
@@ -38,12 +38,15 @@ scripts/
 
 data/
 └── ti.db              # SQLite 单文件，随仓库提交（-wal/-shm 已 gitignore）
+
+shared/
+└── types/ti.ts        # 前后端共享领域模型
 ```
 
 ## 数据流
 
 ```
-Liquipedia → scripts/crawler (Python) → data/ti.db
+Liquipedia → 临时 DB → data audit → static generate/verify → data/ti.db（原子替换）
                                          │
               server/api/*  ←(Drizzle)──┘
                      │  构建期被预渲染调用
@@ -71,7 +74,11 @@ npm run preview          # 本地预览生产构建
 
 npm run db:migrate       # Drizzle 建表/迁移（首次或 schema 变更后）
 npm run db:refresh       # 跑 Python 爬虫刷新 ti.db（需 .venv）
+npm run data:audit       # 校验事实、实体关系、新鲜度与媒体引用
+npm run data:report      # 生成核心字段 diff、revision 与审计报告
 npm test                 # server + crawler 测试
+npm run typecheck        # Nuxt/Vue TypeScript 检查
+npm run verify:static    # 拒绝包含 admin/API/DB 的生产产物
 ```
 
 Python 依赖（仅爬虫需要）：
@@ -88,6 +95,8 @@ python3 -m venv .venv
 - `/ti/:tiNo` Ti 详情（如 `/ti/6`）
 - `/china` 中国战队专题
 - `/rankings` 榜单（冠军 / 奖金池 / 中国战队 / 选手冠军）
+- `/search` 赛事 / 战队 / 选手静态搜索
+- `/about` 来源、许可与非官方声明
 
 ## 部署 Vercel
 
@@ -101,35 +110,42 @@ python3 -m venv .venv
    - **Build Command**：覆盖为 `npm run generate`
    - **Output Directory**：`.output/public`
    - **Install Command**：`npm install`（默认即可）
-   - **Node Version**：`20.x` 或 `22.x`
+   - **Node Version**：`22.x`（仓库通过 `.nvmrc` 与 `package.json` 固定）
 3. Deploy。`.output/public` 即为静态站点。
 
 更新数据的闭环（本地跑爬虫，Vercel 只负责重建静态站）：
 
 ```bash
-npm run db:refresh        # 本地 Python 爬虫刷新 data/ti.db
-git add data/ti.db
-git commit -m "data: refresh ti.db"
-git push                  # Vercel 自动触发 generate 重建
+npm run db:refresh        # 本地 Python 爬虫刷新并审计临时库
+npm run data:report       # 生成 revision、审计与字段差异报告
+git switch -c data/refresh-YYYYMMDD
+git add data/ti.db data/refresh-reports
+git commit -m "data: propose verified TI refresh"
+git push -u origin HEAD  # 提交 PR，审核通过后再合并
 ```
 
 > `better-sqlite3` 在 Vercel **构建期**（Node + amazonlinux）会 `npm rebuild`，构建镜像自带 `python3 make g++`，可直接编译。**运行时**无数据库访问，故无需关心 Lambda 上的原生二进制。
 
-### 方式 B — Nitro SSR（高级，一般无需）
+### 生产安全边界
 
-若需运行时 API（如服务端鉴权、动态查询），改用 Nitro Vercel preset：
-
-- **Framework Preset**：`Nuxt`，**Build Command**：`npm run build`（非 generate）
-- 此时 `server/api/*` 作为 serverless function 部署，`better-sqlite3` 在 Lambda 运行时被加载 —— 需确保 `.output/server` 内的 prebuilt 二进制匹配 Lambda runtime（`node:22`、x86_64）。常见坑：版本不匹配 → `Error: Cannot find module .../node_sqlite3.node`。
-- Lambda 文件系统**只读**，`data/ti.db` 可读但 `journal_mode=WAL`（见 `server/db/client.ts`）会尝试写 `-wal/-shm` 失败。若走此路需改成只读连接，或把 DB 拷到 `/tmp`。
-
-绝大多数展示型场景，**方式 A 足够**。
+SSR、Serverless API、线上 SQLite 与远程管理台不受支持。`npm run build` 等同静态生成；部署物只能是通过 `npm run verify:static` 的 `.output/public`。本地 `/admin` 无认证，只能通过绑定 `127.0.0.1` 的 `npm run dev` 使用；生产构建会移除页面并拒绝管理 API。
 
 ## 数据说明
 
-- 爬虫抓取的事实字段来自 Liquipedia；**人工中文摘要需校对**（headline：冠军、亚军、奖金池、日期、场馆为权威来源；部分低名次奖金为近似）。
+- 核心事实按官方来源、Liquipedia、Wikipedia 的顺序核验；字段值、观察值、revision、抓取时间与人工覆盖分开记录。新抓取值若冲突，保留旧已核验值并标记待核验。
 - 中国战队判定统一读 `placements.is_china_team`，单源真理，不重复维护。
-- 补全/修正数据：本地 `npm run db:refresh` 重抓，或直接改 `ti.db` 后提交。
+- 补全/修正数据：运行 `npm run db:refresh` 创建经审计的原子刷新；核心字段变化通过 PR 人工批准。
+- 未知数字保存为 `NULL`；进行中显示“待定”，取消赛事显示“不适用”，真实 `0` 不作兜底。
+- 第三方媒体须逐文件核验权利；未核验队标与头像不进入公开构建。
+
+## 许可
+
+- 源码：MIT。
+- 原创中文内容：CC BY-SA 4.0。
+- Liquipedia 衍生内容：CC BY-SA 3.0，须保留来源与 revision。
+- 第三方名称、商标与媒体不包含在上述通用许可中。
+
+本站为非商业、非官方项目，未获 Valve 背书。数据契约、运维与许可细节见 `docs/`。
 
 ## 内容来源说明
 

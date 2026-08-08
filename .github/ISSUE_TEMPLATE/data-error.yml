@@ -1,0 +1,32 @@
+name: 数据纠错
+description: 报告赛事事实、实体或来源问题
+title: "[数据纠错] "
+labels: [bug]
+body:
+  - type: input
+    id: tournament
+    attributes:
+      label: 赛事页面
+      placeholder: https://tiwiki.vercel.app/ti/6
+    validations:
+      required: true
+  - type: input
+    id: field
+    attributes:
+      label: 字段
+      placeholder: 奖金池 / 冠军 / 战队名称 / 阵容…
+    validations:
+      required: true
+  - type: textarea
+    id: values
+    attributes:
+      label: 当前值与建议值
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 可核验来源
+      placeholder: 官方页面或对应 Liquipedia 页面
+    validations:
+      required: true

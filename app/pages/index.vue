@@ -4,17 +4,9 @@
     <section
       v-reveal
       class="reveal ti-hero relative overflow-hidden border-b border-edge"
-      @pointermove="handleHeroPointerMove"
-      @pointerleave="resetHeroPointer"
     >
-      <div
-        class="ti-hero-backdrop pointer-events-none absolute inset-0"
-        :style="heroMotionStyle"
-      />
-      <div
-        class="ti-hero-glow pointer-events-none absolute inset-0"
-        :style="heroMotionStyle"
-      >
+      <div class="ti-hero-backdrop pointer-events-none absolute inset-0" />
+      <div class="ti-hero-glow pointer-events-none absolute inset-0">
       </div>
       <div class="relative mx-auto grid min-h-[inherit] max-w-shell items-center gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-10 lg:py-0">
         <div class="min-w-0">
@@ -26,7 +18,7 @@
             Dota2 国际邀请赛中文资料库。按年份梳理冠军、奖金池、最终排名与中国战队表现，打开任一届，30 秒看清结果、背景与中国最佳名次。
           </p>
           <div class="mt-5 flex flex-wrap gap-3">
-            <NuxtLink to="/ti" class="inline-flex min-h-11 items-center rounded-lg bg-gold px-4 py-2 text-sm font-bold text-bg-main shadow-[0_0_8px_rgb(var(--gold)/0.18)] transition-opacity hover:opacity-90">
+            <NuxtLink to="/ti" class="inline-flex min-h-11 items-center rounded-lg bg-gold px-4 py-2 text-sm font-bold text-bg-main transition-opacity hover:opacity-90">
               进入赛事索引 →
             </NuxtLink>
             <NuxtLink to="/china" class="inline-flex min-h-11 items-center rounded-lg border border-edge bg-bg-card/45 px-4 py-2 text-sm font-medium text-ink-main transition-colors hover:border-gold/60">
@@ -52,7 +44,7 @@
           <div class="space-y-4 px-4 py-4">
             <div>
               <p class="text-xs text-ink-muted">{{ featured.status === 'ongoing' ? '状态' : '冠军' }}</p>
-              <p class="mt-1 text-2xl font-black text-gold">{{ featured.champion }}</p>
+              <p class="mt-1 text-2xl font-black text-gold">{{ featured.status === 'ongoing' ? '进行中' : featured.champion }}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -62,7 +54,7 @@
               </div>
               <div>
                 <p class="text-xs text-ink-muted">奖金池</p>
-                <p class="mt-1 font-mono text-base font-bold text-ink-main">{{ formatUsd(featured.prizePoolUsd) }}</p>
+                <p class="mt-1 font-mono text-base font-bold text-ink-main">{{ formatUsd(featured.prizePoolUsd, featured.status) }}</p>
               </div>
             </div>
 
@@ -122,34 +114,10 @@ import { formatUsd, formatTiLabel, placementLabel } from '~/composables/tiData'
 const { data: tournaments } = await useTournaments()
 const { data: stats } = await useStats()
 
-const displayTournaments = computed(() => tournaments.value.filter((t) => t.status !== 'cancelled'))
+const allTournaments = computed(() => tournaments.value.filter((t) => t.status !== 'cancelled'))
+const displayTournaments = computed(() => allTournaments.value.slice(0, 6))
 
-const heroPointer = reactive({ x: 0, y: 0 })
-const heroMotionStyle = computed(() => ({
-  '--hero-x': `${heroPointer.x}px`,
-  '--hero-y': `${heroPointer.y}px`,
-  '--hero-bg-x': `${heroPointer.x * -0.58}px`,
-  '--hero-bg-y': `${heroPointer.y * -0.46}px`,
-  '--hero-glow-x': `${heroPointer.x * 0.32}px`,
-  '--hero-glow-y': `${heroPointer.y * 0.28}px`,
-  '--hero-hot-x': `${heroPointer.x * 0.3}px`,
-  '--hero-hot-y': `${heroPointer.y * 0.26}px`,
-  '--hero-rotate': `${heroPointer.x * 0.14}deg`,
-}))
-
-function handleHeroPointerMove(event: PointerEvent) {
-  if (event.pointerType !== 'mouse') return
-  const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  heroPointer.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 58
-  heroPointer.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 44
-}
-
-function resetHeroPointer() {
-  heroPointer.x = 0
-  heroPointer.y = 0
-}
-
-const featured = computed(() => displayTournaments.value[0] ?? null)
+const featured = computed(() => allTournaments.value[0] ?? null)
 
 const latestChinaTag = computed(() => {
   if (!featured.value || featured.value.status !== 'completed') return ''
@@ -164,4 +132,10 @@ const statsCards = computed(() => [
   { label: '中国冠军', value: String(stats.value.chinaChampionsCount), suffix: '次' },
   { label: '最高奖金池', value: formatUsd(stats.value.maxPrizePool), sub: formatTiLabel(stats.value.maxPrizeTiNo) },
 ])
+
+usePageSeo(
+  'Ti 百科 — Dota2 国际邀请赛中文资料库',
+  '按年份查询 Ti 历届冠军、奖金池、最终排名与中国战队表现。',
+  '/',
+)
 </script>

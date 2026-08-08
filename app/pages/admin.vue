@@ -82,7 +82,11 @@
             <table class="admin-grid-table">
               <thead>
                 <tr>
-                  <th v-for="field in tableColumns" :key="field.name">
+                  <th
+                    v-for="field in tableColumns"
+                    :key="field.name"
+                    :aria-sort="sort === field.name ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                  >
                     <button class="inline-flex items-center gap-1" type="button" @click="toggleSort(field.name)">
                       {{ field.label }}
                       <span class="font-mono text-[10px] text-ink-muted">{{ sortMark(field.name) }}</span>
@@ -98,7 +102,17 @@
                   @click="selectRow(row)"
                 >
                   <td v-for="field in tableColumns" :key="field.name">
-                    <span :class="field.type === 'integer' || field.type === 'boolean' ? 'font-mono' : ''">
+                    <button
+                      v-if="field.name === tableColumns[0]?.name"
+                      type="button"
+                      class="min-h-10 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+                      :aria-pressed="rowKey(row) === selectedRowKey"
+                      :class="field.type === 'integer' || field.type === 'boolean' ? 'font-mono' : ''"
+                      @click.stop="selectRow(row)"
+                    >
+                      {{ formatCell(row[field.name], field) }}
+                    </button>
+                    <span v-else :class="field.type === 'integer' || field.type === 'boolean' ? 'font-mono' : ''">
                       {{ formatCell(row[field.name], field) }}
                     </span>
                   </td>
@@ -262,7 +276,7 @@ const searchInput = ref('')
 const sort = ref('')
 const dir = ref<'asc' | 'desc'>('desc')
 const selectedRow = ref<Record<string, unknown> | null>(null)
-const form = reactive<Record<string, unknown>>({})
+const form = reactive<Record<string, any>>({})
 const formMode = ref<'create' | 'edit'>('create')
 const saving = ref(false)
 const formError = ref('')

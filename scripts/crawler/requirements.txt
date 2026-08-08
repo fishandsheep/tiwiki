@@ -1,3 +1,4 @@
-requests>=2.31
-beautifulsoup4>=4.12
-mwparserfromhell>=0.6
+requests==2.34.2
+beautifulsoup4==4.15.0
+mwparserfromhell==0.7.2
+Pillow==12.3.0

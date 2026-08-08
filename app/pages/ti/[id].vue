@@ -2,6 +2,16 @@
   <div>
     <TiHero :t="detail!" />
 
+    <nav v-if="previousTournament || nextTournament" aria-label="相邻赛事" class="mx-auto flex max-w-shell items-center justify-between gap-3 px-3 pt-4 sm:px-4">
+      <NuxtLink v-if="previousTournament" :to="`/ti/${previousTournament.routeId}`" class="text-sm text-ink-muted transition-colors hover:text-gold">
+        ← Ti{{ previousTournament.tiNo }}
+      </NuxtLink>
+      <span v-else />
+      <NuxtLink v-if="nextTournament" :to="`/ti/${nextTournament.routeId}`" class="text-sm text-ink-muted transition-colors hover:text-gold">
+        Ti{{ nextTournament.tiNo }} →
+      </NuxtLink>
+    </nav>
+
     <div class="mx-auto max-w-shell px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
       <div class="grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         <!-- 主内容 -->
@@ -42,6 +52,12 @@
           <TiInfoPanel v-reveal :t="detail!" @focus-team="focusTeam" />
         </div>
       </div>
+
+      <div class="mt-5 flex justify-end">
+        <a :href="reportIssueUrl" target="_blank" rel="noopener noreferrer" class="text-xs text-ink-muted underline decoration-edge underline-offset-4 transition-colors hover:text-gold">
+          报告数据问题
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -53,7 +69,7 @@ const route = useRoute()
 const router = useRouter()
 const id = String(route.params.id)
 const activeTeamId = ref('')
-let activeTeamTimer: ReturnType<typeof window.setTimeout> | null = null
+let activeTeamTimer: ReturnType<typeof setTimeout> | null = null
 
 const { data: detail } = await useTournament(id)
 if (!detail.value) {
@@ -61,6 +77,13 @@ if (!detail.value) {
 }
 
 const { data: china } = await useChinaPerformance(detail.value.id)
+const { data: tournaments } = await useTournaments()
+const numberedTournaments = computed(() => tournaments.value
+  .filter((t) => t.status !== 'cancelled')
+  .sort((a, b) => a.tiNo - b.tiNo))
+const currentIndex = computed(() => numberedTournaments.value.findIndex((t) => t.id === detail.value?.id))
+const previousTournament = computed(() => currentIndex.value > 0 ? numberedTournaments.value[currentIndex.value - 1] : null)
+const nextTournament = computed(() => currentIndex.value >= 0 ? numberedTournaments.value[currentIndex.value + 1] || null : null)
 
 function clearActiveTeamTimer() {
   if (activeTeamTimer) {
@@ -75,9 +98,11 @@ async function scrollToTeam(teamId: string) {
   const target = document.getElementById(`roster-${teamId}`)
   if (!target) return
   activeTeamId.value = teamId
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
+  target.focus({ preventScroll: true })
   clearActiveTeamTimer()
-  activeTeamTimer = window.setTimeout(() => {
+  activeTeamTimer = setTimeout(() => {
     if (activeTeamId.value === teamId) activeTeamId.value = ''
     activeTeamTimer = null
   }, 2200)
@@ -111,11 +136,37 @@ onBeforeUnmount(() => {
   clearActiveTeamTimer()
 })
 
+const pageTitle = detail.value.status === 'cancelled'
+  ? `${detail.value.year} 赛事取消 — Ti百科`
+  : `Ti${detail.value.tiNo} · ${detail.value.nameZh} — Ti百科`
+const canonical = usePageSeo(pageTitle, detail.value.summaryZh, `/ti/${detail.value.routeId}`)
+const reportIssueUrl = computed(() => {
+  const title = `[数据纠错] ${detail.value?.status === 'cancelled' ? detail.value.year : `Ti${detail.value?.tiNo}`}`
+  const body = `赛事：${canonical}\n字段：\n当前值：\n建议值：\n来源：\n`
+  return `https://github.com/fishandsheep/tiwiki/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
+})
+
 useHead({
-  title:
-    detail.value.status === 'cancelled'
-      ? `${detail.value.year} 赛事取消 — Ti百科`
-      : `Ti${detail.value.tiNo} · ${detail.value.nameZh} — Ti百科`,
-  meta: [{ name: 'description', content: detail.value.summaryZh }],
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SportsEvent',
+      name: detail.value.nameZh,
+      url: canonical,
+      startDate: detail.value.startDate || undefined,
+      endDate: detail.value.endDate || undefined,
+      eventStatus: detail.value.status === 'cancelled'
+        ? 'https://schema.org/EventCancelled'
+        : detail.value.status === 'ongoing'
+          ? 'https://schema.org/EventScheduled'
+          : 'https://schema.org/EventCompleted',
+      location: {
+        '@type': 'Place',
+        name: detail.value.venue || detail.value.city,
+        address: [detail.value.city, detail.value.country].filter(Boolean).join(', '),
+      },
+    }),
+  }],
 })
 </script>

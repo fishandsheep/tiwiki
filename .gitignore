@@ -26,6 +26,10 @@ logs
 # SQLite runtime files (ti.db committed as seed data)
 data/*.db-shm
 data/*.db-wal
+data/import-media/
+data/media-review/
+/test-results/
+/playwright-report/
 
 # Python
 __pycache__/

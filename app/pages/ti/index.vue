@@ -33,7 +33,7 @@
           @click="clear"
         >清空</button>
       </label>
-      <p class="mt-2 text-xs text-ink-muted">
+      <p aria-live="polite" class="mt-2 text-xs text-ink-muted">
         <template v-if="q">匹配 {{ filtered.length }} / {{ tournaments.length }} 届 · 按 <kbd class="rounded border border-edge px-1 font-mono">/</kbd> 聚焦</template>
         <template v-else>共 {{ tournaments.length }} 届 · 按 <kbd class="rounded border border-edge px-1 font-mono">/</kbd> 快速搜索</template>
       </p>
@@ -110,5 +110,5 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
-useHead({ title: '历届赛事 — Ti百科' })
+usePageSeo('历届赛事 — Ti百科', '浏览 Ti1 至今的赛事档案、冠军、奖金与中国战队成绩。', '/ti')
 </script>

@@ -42,6 +42,27 @@ body {
     linear-gradient(180deg, rgb(21 13 10), rgb(var(--bg-main)) 24rem);
 }
 
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 0.5rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 6px;
+  background: rgb(var(--gold));
+  color: rgb(var(--bg-main));
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 /* Glass card surface */
 @layer components {
   .card {
@@ -71,11 +92,10 @@ body {
     color: rgb(var(--gold));
   }
   .ti-wordmark {
-    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: "Cormorant Garamond", Georgia, serif;
     font-weight: 700;
     letter-spacing: 0.08em;
     color: rgb(var(--gold));
-    text-shadow: 0 0 14px rgb(var(--red) / 0.14);
   }
   .admin-panel {
     @apply rounded-xl border border-edge bg-bg-card/95 p-3;
@@ -130,7 +150,6 @@ body {
     isolation: isolate;
     min-height: clamp(360px, 50vh, 520px);
     background: rgb(var(--bg-main));
-    cursor: crosshair;
   }
   .ti-hero-backdrop {
     --hero-x: 0px;
@@ -145,9 +164,6 @@ body {
     background-size: cover;
     filter: blur(6px) saturate(0.9) contrast(1.14) brightness(0.62);
     transform: translate3d(var(--hero-bg-x), var(--hero-bg-y), 0) scale(1.07) rotate(var(--hero-rotate));
-    transition: transform 240ms var(--ease-out-quart), filter 240ms var(--ease-out-quart);
-    animation: hero-dream-drift 14s ease-in-out infinite alternate;
-    will-change: transform, filter;
   }
   .ti-hero:hover .ti-hero-backdrop {
     filter: blur(5px) saturate(1) contrast(1.2) brightness(0.7);
@@ -306,25 +322,21 @@ html.js .revealed .bar-grow {
   transform: scaleY(1);
 }
 
-@keyframes hero-dream-drift {
-  0% { background-position: 48% 48%; }
-  50% { background-position: 55% 56%; }
-  100% { background-position: 59% 43%; }
-}
-
 /* Reduced motion: instant, never gate content. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+  html { scroll-behavior: auto; }
+  .page-enter-active,
+  .page-leave-active,
+  html.js .reveal,
+  html.js .bar-grow { transition: none !important; }
   html.js .reveal,
   html.js .bar-grow {
     opacity: 1 !important;
+    transform: none !important;
+  }
+  .ti-hero-backdrop,
+  .ti-hero-glow {
+    animation: none !important;
     transform: none !important;
   }
 }

@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { dirname, resolve } from 'node:path'
+import { dirname, relative, resolve } from 'node:path'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
@@ -19,7 +19,7 @@ interface AdminField {
 }
 
 interface AdminTableConfig {
-  name: AdminTableName
+  name: string
   label: string
   primaryKey: string
   primaryKeyType: 'text' | 'integer'
@@ -53,7 +53,7 @@ export interface AdminMeta {
     fields: AdminField[]
     rowCount: number
   }>
-  options: Record<string, Array<{ value: string; label: string }>>
+  options: Record<'tournaments' | 'teams' | 'players', Array<{ value: string; label: string }>>
 }
 
 export class AdminValidationError extends Error {
@@ -99,7 +99,7 @@ const tableConfigs = {
       { name: 'country', label: '国家/地区', type: 'text', nullable: true },
       { name: 'city', label: '城市', type: 'text', nullable: true },
       { name: 'venue', label: '场馆', type: 'text', nullable: true },
-      { name: 'prize_pool_usd', label: '奖金池 USD', type: 'integer', defaultValue: 0 },
+      { name: 'prize_pool_usd', label: '奖金池 USD', type: 'integer', nullable: true, defaultValue: null },
       { name: 'champion_team_id', label: '冠军队伍', type: 'select', nullable: true, references: 'teams' },
       { name: 'runner_up_team_id', label: '亚军队伍', type: 'select', nullable: true, references: 'teams' },
       { name: 'summary_zh', label: '赛事简介', type: 'textarea', defaultValue: '' },
@@ -325,6 +325,20 @@ function normalizeRemoteUrl(value: string) {
   return value
 }
 
+function allowedRemoteUrl(value: string) {
+  let url: URL
+  try {
+    url = new URL(normalizeRemoteUrl(value))
+  } catch {
+    throw new AdminValidationError('头像来源必须是有效 URL')
+  }
+  const allowedHost = url.hostname === 'liquipedia.net' || url.hostname.endsWith('.liquipedia.net')
+  if (url.protocol !== 'https:' || !allowedHost) {
+    throw new AdminValidationError('头像来源域名不在允许列表中')
+  }
+  return url.toString()
+}
+
 function liquipediaFileNameFrom(value: string) {
   const trimmed = value.trim()
   if (!trimmed) return ''
@@ -341,46 +355,26 @@ function liquipediaFileNameFrom(value: string) {
 
 async function fetchForAvatar(url: string, options: RequestInit = {}) {
   try {
-    return await fetch(url, {
-      ...options,
-      headers: {
-        'User-Agent': 'tiwiki-admin/1.0',
-        ...(options.headers || {}),
-      },
-      signal: options.signal || AbortSignal.timeout(20000),
-    })
-  } catch {
-    throw new AdminValidationError('头像来源下载失败：无法连接或请求超时，请确认图片地址可访问')
-  }
-}
-
-function curlForAvatar(url: string) {
-  const tempOutput = resolve(tmpdir(), `tiwiki-avatar-${Date.now()}-${Math.random().toString(36).slice(2)}`)
-  const result = spawnSync('curl', [
-    '-L',
-    '--fail',
-    '--silent',
-    '--show-error',
-    '--max-time',
-    '30',
-    '--user-agent',
-    'tiwiki-admin/1.0',
-    '--output',
-    tempOutput,
-    '--write-out',
-    '%{content_type}\\n%{url_effective}',
-    url,
-  ], { encoding: 'utf8' })
-
-  try {
-    if (result.status !== 0) {
-      throw new AdminValidationError(`头像来源下载失败：${result.stderr || 'curl 请求失败'}`)
+    let current = allowedRemoteUrl(url)
+    for (let redirects = 0; redirects <= 3; redirects += 1) {
+      const response = await fetch(current, {
+        ...options,
+        redirect: 'manual',
+        headers: {
+          'User-Agent': 'tiwiki-admin/1.0',
+          ...(options.headers || {}),
+        },
+        signal: options.signal || AbortSignal.timeout(20000),
+      })
+      if (response.status < 300 || response.status >= 400) return response
+      const location = response.headers.get('location')
+      if (!location) throw new AdminValidationError('头像来源重定向缺少目标地址')
+      current = allowedRemoteUrl(new URL(location, current).toString())
     }
-    const [contentType = '', effectiveUrl = url] = result.stdout.split('\n')
-    const bytes = readFileSync(tempOutput)
-    return { bytes, contentType, effectiveUrl }
-  } finally {
-    rmSync(tempOutput, { force: true })
+    throw new AdminValidationError('头像来源重定向次数过多')
+  } catch (error) {
+    if (error instanceof AdminValidationError) throw error
+    throw new AdminValidationError('头像来源下载失败：无法连接或请求超时，请确认图片地址可访问')
   }
 }
 
@@ -468,16 +462,9 @@ async function resolveLiquipediaImageUrl(source: string) {
   apiUrl.searchParams.set('format', 'json')
   apiUrl.searchParams.set('formatversion', '2')
 
-  let payload: { query?: { pages?: Array<{ imageinfo?: Array<{ url?: string }> }> } }
-  try {
-    const response = await fetchForAvatar(apiUrl.toString())
-    if (!response.ok) throw new AdminValidationError(`头像来源解析失败：HTTP ${response.status}`)
-    payload = await response.json() as typeof payload
-  } catch (error) {
-    if (error instanceof AdminValidationError && !error.message.startsWith('头像来源下载失败')) throw error
-    const fallback = curlForAvatar(apiUrl.toString())
-    payload = JSON.parse(fallback.bytes.toString('utf8')) as typeof payload
-  }
+  const response = await fetchForAvatar(apiUrl.toString())
+  if (!response.ok) throw new AdminValidationError(`头像来源解析失败：HTTP ${response.status}`)
+  const payload = await response.json() as { query?: { pages?: Array<{ imageinfo?: Array<{ url?: string }> }> } }
   const resolved = payload.query?.pages?.[0]?.imageinfo?.[0]?.url
   if (!resolved) throw new AdminValidationError('头像来源解析失败：没有找到对应的 Liquipedia 图片')
   return resolved
@@ -488,11 +475,21 @@ async function readMediaSource(sourceUrl: string) {
   if (!value) return null
   if (value.startsWith('/media/')) {
     const localPath = resolve(process.cwd(), 'public', value.replace(/^\/+/, ''))
+    const publicMediaRoot = resolve(process.cwd(), 'public/media')
+    const pathFromRoot = relative(publicMediaRoot, localPath)
+    if (pathFromRoot.startsWith('..') || pathFromRoot.startsWith('/')) {
+      throw new AdminValidationError('本地头像来源必须位于 public/media 目录')
+    }
     if (!existsSync(localPath)) throw new AdminValidationError('头像来源对应的本地文件不存在')
     return { bytes: readFileSync(localPath), ext: sourcePathExt(localPath), normalizedSource: value }
   }
   if (value.startsWith('file:')) {
-    const localPath = fileURLToPath(value)
+    const localPath = resolve(fileURLToPath(value))
+    const importRoot = resolve(process.cwd(), 'data/import-media')
+    const pathFromRoot = relative(importRoot, localPath)
+    if (pathFromRoot.startsWith('..') || pathFromRoot.startsWith('/')) {
+      throw new AdminValidationError('本地头像来源必须位于 data/import-media 专用导入目录')
+    }
     if (!existsSync(localPath)) throw new AdminValidationError('头像来源对应的本地文件不存在')
     return { bytes: readFileSync(localPath), ext: sourcePathExt(localPath), normalizedSource: value }
   }
@@ -501,22 +498,13 @@ async function readMediaSource(sourceUrl: string) {
   }
 
   const url = await resolveLiquipediaImageUrl(value)
-  let bytes: Buffer
-  let contentType = ''
-  let normalizedSource = url
-  try {
-    const response = await fetchForAvatar(url)
-    if (!response.ok) throw new AdminValidationError(`头像来源下载失败：HTTP ${response.status}`)
-    contentType = response.headers.get('content-type') || ''
-    bytes = Buffer.from(await response.arrayBuffer())
-    normalizedSource = response.url || url
-  } catch (error) {
-    if (error instanceof AdminValidationError && !error.message.startsWith('头像来源下载失败')) throw error
-    const fallback = curlForAvatar(url)
-    bytes = fallback.bytes
-    contentType = fallback.contentType
-    normalizedSource = fallback.effectiveUrl
-  }
+  const response = await fetchForAvatar(url)
+  if (!response.ok) throw new AdminValidationError(`头像来源下载失败：HTTP ${response.status}`)
+  const contentType = response.headers.get('content-type') || ''
+  const contentLength = Number(response.headers.get('content-length') || 0)
+  if (contentLength > 8 * 1024 * 1024) throw new AdminValidationError('头像来源图片超过 8MB')
+  const bytes = Buffer.from(await response.arrayBuffer())
+  const normalizedSource = allowedRemoteUrl(response.url || url)
   if (contentType && !contentType.startsWith('image/')) {
     throw new AdminValidationError('头像来源下载失败：地址返回的不是图片文件')
   }
@@ -534,7 +522,7 @@ export async function preparePlayerAvatar(playerId: string | number, sourceUrl: 
   const media = await readMediaSource(source)
   if (!media) return {}
 
-  const mediaDir = resolve(process.cwd(), 'public/media/liquipedia/players')
+  const mediaDir = resolve(process.cwd(), 'data/media-review/players')
   mkdirSync(mediaDir, { recursive: true })
   const slug = slugifyMediaName(String(playerId))
   const tempInput = resolve(tmpdir(), `${slug}-${Date.now()}${media.ext}`)
@@ -551,7 +539,7 @@ export async function preparePlayerAvatar(playerId: string | number, sourceUrl: 
       removeExistingPlayerAvatarFiles(mediaDir, slug)
       writeFileSync(finalPath, readFileSync(tempOutput))
       return {
-        avatar: `/media/liquipedia/players/${slug}${outputExt}`,
+        avatar: '',
         avatar_source_url: media.normalizedSource,
       }
     }
@@ -564,17 +552,12 @@ export async function preparePlayerAvatar(playerId: string | number, sourceUrl: 
       removeExistingPlayerAvatarFiles(mediaDir, slug)
       writeFileSync(finalPath, readFileSync(tempOutput))
       return {
-        avatar: `/media/liquipedia/players/${slug}${outputExt}`,
+        avatar: '',
         avatar_source_url: media.normalizedSource,
       }
     }
 
-    removeExistingPlayerAvatarFiles(mediaDir, slug)
-    writeFileSync(finalPath, media.bytes)
-    return {
-      avatar: `/media/liquipedia/players/${slug}${outputExt}`,
-      avatar_source_url: media.normalizedSource,
-    }
+    throw new AdminValidationError('头像图片处理失败：需要 ImageMagick 或 FFmpeg 完成安全解码')
   } finally {
     rmSync(tempInput, { force: true })
     rmSync(tempOutput, { force: true })
@@ -597,7 +580,7 @@ function mapSqliteError(error: unknown): never {
   throw error
 }
 
-export function createAdminService(sqlite: Database.Database = singleton) {
+export function createAdminService(sqlite: Database.Database = getDefaultDb()) {
   return {
     getMeta(): AdminMeta {
       const tables = Object.values(tableConfigs).map((config) => ({

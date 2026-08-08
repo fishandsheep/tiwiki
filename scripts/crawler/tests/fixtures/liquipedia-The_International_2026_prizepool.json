@@ -1,0 +1,23 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "pages": [
+      {
+        "pageid": 189791,
+        "ns": 0,
+        "title": "The International/2026/prizepool",
+        "revisions": [
+          {
+            "slots": {
+              "main": {
+                "contentmodel": "wikitext",
+                "contentformat": "text/x-wiki",
+                "content": "1,600,000"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

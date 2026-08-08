@@ -60,9 +60,8 @@ const champions = computed(() => rankings.value.chinaTeams.filter((c) => c.bestR
 
 function chipClass(rank: number) {
   if (rank === 1) return 'chip-gold'
-  if (rank === 2) return 'chip-red'
   return ''
 }
 
-useHead({ title: '中国战队 — Ti百科' })
+usePageSeo('中国战队 — Ti百科', '回顾中国战队历届 Ti 成绩、冠军与最佳名次。', '/china')
 </script>

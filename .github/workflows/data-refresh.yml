@@ -1,0 +1,46 @@
+name: Data refresh proposal
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci
+      - run: python -m venv .venv
+      - run: .venv/bin/pip install -r scripts/crawler/requirements.txt
+      - run: .venv/bin/python scripts/crawler/scheduled_refresh.py
+      - run: npm run data:audit
+      - run: npm run data:report
+      - name: Create reviewed data PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "No data changes"
+            exit 0
+          fi
+          branch="data/refresh-$(date -u +%Y%m%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add data/ti.db data/refresh-reports
+          git commit -m "data: propose verified TI refresh"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "data: propose TI refresh for review" --body-file data/refresh-reports/latest.md

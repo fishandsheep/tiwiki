@@ -22,5 +22,5 @@
 
 <script setup lang="ts">
 const { data: rankings } = await useRankings()
-useHead({ title: '榜单 — Ti百科' })
+usePageSeo('榜单 — Ti百科', '查看 Ti 历届冠军、奖金池、中国战队与冠军选手榜单。', '/rankings')
 </script>
