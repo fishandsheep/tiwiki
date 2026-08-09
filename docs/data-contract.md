@@ -21,4 +21,4 @@ Crawler facts and human overrides are separate. An override records JSON value, 
 
 ## Release blockers
 
-Foreign-key failures, missing core facts, a completed tournament with a missing/zero prize pool, champion/runner-up placement mismatch, a placement outside the participant set, stale ongoing data, missing source URLs, and broken local media references block release. Missing portraits, logos, or Chinese summaries degrade with explicit placeholders or warnings.
+Foreign-key failures, missing core facts, a completed tournament with a missing/zero prize pool, champion/runner-up placement mismatch, a placement outside the participant set, stale ongoing data, missing source URLs, ordinary unverified media, and broken local media references block release. Explicitly restored historical media is tracked as `restored` and produces a warning until rights are verified. Missing portraits, logos, or Chinese summaries otherwise degrade with explicit placeholders or warnings.

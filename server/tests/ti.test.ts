@@ -31,16 +31,22 @@ test('Ti15 detail shows all qualified teams while final ranking pending', async 
   assert.ok(detail?.rosters.some((team) => team.teamId === 'lgd-gaming' && team.players.some((player) => player.handle === 'fcr' && player.role === '助理教练')))
 })
 
-test('TI6 detail has placements and rosters while unverified media degrades to placeholders', async () => {
+test('TI6 detail exposes local team logos and player avatars', async () => {
   const detail = await getTournamentDetail('6')
   assert.ok(detail)
   assert.equal(detail?.tiNo, 6)
   assert.ok((detail?.placements.length || 0) >= 16)
   assert.ok((detail?.rosters.length || 0) >= 16)
-  assert.ok(detail?.participants.every((participant) => !participant.teamLogo))
-  assert.ok(detail?.placements.every((placement) => !placement.teamLogo))
-  assert.ok(detail?.rosters.every((team) => !team.teamLogo))
-  assert.ok(detail?.rosters.every((team) => team.players.every((player) => !player.avatar)))
+  const teamLogos = [
+    ...(detail?.participants.map((participant) => participant.teamLogo) || []),
+    ...(detail?.placements.map((placement) => placement.teamLogo || '') || []),
+    ...(detail?.rosters.map((team) => team.teamLogo) || []),
+  ].filter(Boolean)
+  assert.ok(teamLogos.length > 0)
+  assert.ok(teamLogos.every((logo) => logo.startsWith('/media/')))
+  const avatars = detail?.rosters.flatMap((team) => team.players.map((player) => player.avatar).filter(Boolean)) || []
+  assert.ok(avatars.length > 0)
+  assert.ok(avatars.every((avatar) => avatar.startsWith('/media/')))
 })
 
 test('rankings and stats return core aggregates', async () => {

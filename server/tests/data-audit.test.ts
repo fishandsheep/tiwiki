@@ -162,6 +162,25 @@ test('data audit rejects unverified media and paths escaping the public media ro
   }
 })
 
+test('data audit allows explicitly restored historical media with a warning', () => {
+  const fixture = createFixture()
+  try {
+    fixture.db.prepare('UPDATE media_rights SET status = ?, permission_note = ?').run(
+      'restored',
+      'Restored historical media; rights verification pending.',
+    )
+    const report = auditDatabase(fixture.db, {
+      mediaRoot: fixture.mediaRoot,
+      now: new Date('2099-08-02T00:00:00Z'),
+    })
+    assert.equal(report.ok, true, report.errors.join('\n'))
+    assert.ok(report.warnings.some((warning) => warning.includes('pending rights verification')))
+  } finally {
+    fixture.db.close()
+    rmSync(fixture.mediaRoot, { recursive: true, force: true })
+  }
+})
+
 test('data audit rejects missing core fields and incomplete provenance', () => {
   const fixture = createFixture()
   try {

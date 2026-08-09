@@ -130,7 +130,7 @@
                   <span class="truncate">{{ p.teamName }}</span>
                 </button>
               </td>
-              <td class="px-4 py-3 text-ink-muted">{{ p.region || '—' }}</td>
+              <td class="whitespace-nowrap px-4 py-3 text-ink-muted">{{ p.region || '—' }}</td>
               <td class="px-4 py-3">
                 <span v-if="p.inviteType" class="chip text-[10px]">{{ p.inviteType }}</span>
                 <span v-else class="text-ink-muted">—</span>

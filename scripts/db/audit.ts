@@ -37,6 +37,8 @@ function localMediaErrors(
   mediaRoot: string,
 ) {
   const errors: string[] = []
+  const warnings: string[] = []
+  const warnedPaths = new Set<string>()
   const mediaBase = resolve(mediaRoot, 'media')
   const rights = sqlite.prepare(`
     select status, file_page_url, author, source_url, license, permission_note, source_revision
@@ -55,9 +57,16 @@ function localMediaErrors(
     const complete = record?.status === 'verified'
       && ['file_page_url', 'author', 'source_url', 'license', 'permission_note', 'source_revision']
         .every((field) => record[field]?.trim())
-    if (!complete) errors.push(`${table} ${row.id} media ${row.media} has no verified rights record`)
+    const restored = record?.status === 'restored'
+      && record.source_url?.trim()
+      && record.permission_note?.trim()
+    if (!complete && !restored) errors.push(`${table} ${row.id} media ${row.media} has no verified rights record`)
+    if (restored) warnedPaths.add(row.media)
   }
-  return errors
+  if (warnedPaths.size) {
+    warnings.push(`${table} has ${warnedPaths.size} media assets restored from the historical archive and pending rights verification`)
+  }
+  return { errors, warnings }
 }
 
 export function auditDatabase(sqlite: Database.Database, options: DataAuditOptions): DataAuditReport {
@@ -159,8 +168,13 @@ export function auditDatabase(sqlite: Database.Database, options: DataAuditOptio
     errors.push(`participant team ${row.team_id} has no final placement in ${row.tournament_id}`)
   }
 
-  errors.push(...localMediaErrors(sqlite, 'teams', 'logo', options.mediaRoot))
-  errors.push(...localMediaErrors(sqlite, 'players', 'avatar', options.mediaRoot))
+  for (const media of [
+    localMediaErrors(sqlite, 'teams', 'logo', options.mediaRoot),
+    localMediaErrors(sqlite, 'players', 'avatar', options.mediaRoot),
+  ]) {
+    errors.push(...media.errors)
+    warnings.push(...media.warnings)
+  }
 
   const missingSummaries = sqlite.prepare(`
     select count(*) as count from tournaments
